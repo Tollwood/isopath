@@ -46,8 +46,8 @@ public class Board {
                 }   
         }
      
-        setDigger();
-        setClimber();
+       setDigger();
+       setClimber();
     }
 
     private void setClimber()

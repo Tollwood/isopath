@@ -43,10 +43,10 @@ public class MouseInput: MonoBehaviour {
         Ray ray = camera.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out hit))
         {
-            Draggable draggable = hit.transform.parent.GetComponent<Draggable>();
+            Draggable draggable = hit.transform.GetComponent<Draggable>();
             if (draggable != null && draggable.isDraggable())
             {
-                draggedObject = hit.transform.parent;
+                draggedObject = hit.transform;
                 startPosition = draggedObject.position;
                 draggedObject.transform.localScale = dragScale;
             }
@@ -59,7 +59,7 @@ public class MouseInput: MonoBehaviour {
         Ray ray = camera.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out hit))
         {
-            Hexagon to = hit.transform.parent.GetComponent<Hexagon>();
+            Hexagon to = hit.transform.GetComponent<Hexagon>();
             if (to != null)
             {
                 Hexagon draggingHexagon = draggedObject.GetComponent<Hexagon>();

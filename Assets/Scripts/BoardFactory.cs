@@ -10,8 +10,9 @@ public class BoardFactory : MonoBehaviour
     public Material hoverMaterial;
     public int size;
 
-                          // TODO extract offset
+    public float xqOffSet = 1.7320508f;
     public float zrOffset = 1.5f;
+
     internal Board create()
     {
         Board board = new Board(size);
@@ -80,13 +81,13 @@ public class BoardFactory : MonoBehaviour
         switch (tileLevel)
         {
             case TileLevel.HILL:
-                stoneOffset = 1.2f;
+                stoneOffset = 0.6f;
                 break;
             default:
-                stoneOffset = 0.1f;
+                stoneOffset = 0.13f;
                 break;
         }
-        return new Vector3(coord.q * 2 +  coord.r, stoneOffset, zrOffset * coord.r);
+        return new Vector3(coord.q * xqOffSet +  coord.r, stoneOffset, zrOffset * coord.r);
     }
 
     public Vector3 GetPositionForHexagon(Coord coord, TileLevel tileLevel)
@@ -95,15 +96,15 @@ public class BoardFactory : MonoBehaviour
         switch (tileLevel)
         {
             case TileLevel.HILL:
-                tileLevelOffSet = 1f;
+                tileLevelOffSet = 0.3f;
                 break;
             case TileLevel.GROUND:
-                tileLevelOffSet = 0.5f;
+                tileLevelOffSet = 0.1f;
                 break;
             default:
                 tileLevelOffSet = 0f;
                 break;
         }
-        return new Vector3(coord.q * 2 +  coord.r, tileLevelOffSet, zrOffset * coord.r);
+        return new Vector3(coord.q * xqOffSet +  coord.r, tileLevelOffSet, zrOffset * coord.r);
     }
 }

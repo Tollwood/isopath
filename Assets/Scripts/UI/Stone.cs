@@ -11,7 +11,7 @@ public class Stone : MonoBehaviour, Draggable{
 
     private void Awake()
     {
-        meshRenderer = GetComponentInChildren<MeshRenderer>();
+        meshRenderer = GetComponent<MeshRenderer>();
     }
 
     private void Start()
