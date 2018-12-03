@@ -1,16 +1,18 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
 
 public class Hexagon : MonoBehaviour, Draggable{
-
+    
     public  Material hoverMaterial;
-    private Material originalMaterial;
+    public Material originalMaterial;
     private MeshRenderer meshRenderer;
     public Coord coord;
     private Board board;
 
     private void Awake()
     {
-        meshRenderer = GetComponentInChildren<MeshRenderer>();   
+        meshRenderer = GetComponent<MeshRenderer>();   
     }
 
     private void Start()
@@ -24,25 +26,22 @@ public class Hexagon : MonoBehaviour, Draggable{
         meshRenderer.material = originalMaterial;
     }
 
-    public void OnMouseEnter()
-    {
-        if(board.canMoveTile(coord)){
-            meshRenderer.material = hoverMaterial;
-            Debug.Log(coord);
-        }
-
-    }
-
     public void OnMouseExit(){
         meshRenderer.material = originalMaterial;
     }
 
     public bool isDraggable()
     {
-        return board.canMoveTile(coord);
+        return Rules.canMoveTile(board,coord);
     }
 
     public Tile getTile(){
         return board.coordToTile(coord);
+    }
+
+    internal void Highlight()
+    {
+        meshRenderer.material = hoverMaterial;
+        Debug.Log(coord);
     }
 }
