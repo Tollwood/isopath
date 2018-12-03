@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657856, g: 0.49641234, b: 0.57481724, a: 1}
+  m_IndirectSpecularColor: {r: 0.44941044, g: 0.49948567, b: 0.57569444, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -172,13 +172,13 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 170076733}
-  m_LocalRotation: {x: 0.40821788, y: -0.23456968, z: 0.10938163, w: 0.8754261}
-  m_LocalPosition: {x: -44.9, y: 5.78, z: 38.6}
+  m_LocalRotation: {x: 0.9044603, y: -0.09085184, z: 0.24234937, w: 0.33906376}
+  m_LocalPosition: {x: -50.63, y: 19.3, z: 38.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
+  m_LocalEulerAnglesHint: {x: 138.9, y: -30, z: 0}
 --- !u!1 &353051534
 GameObject:
   m_ObjectHideFlags: 0
@@ -684,8 +684,8 @@ MonoBehaviour:
     type: 2}
   stonePrefab: {fileID: 1944804429575732, guid: 7823e136fbd7f419e9f486f41bbd952b,
     type: 2}
-  hill: {fileID: 2100000, guid: 896ab6536c89e4782aad992d24dde34f, type: 2}
-  ground: {fileID: 2100000, guid: d1d4af0379b464fa181f58bc9c1a3088, type: 2}
+  hill: {fileID: 2100000, guid: 97827114d413d426d85c90f16c22029c, type: 2}
+  ground: {fileID: 2100000, guid: 109e5635036114c68bc08132f5790eed, type: 2}
   underground: {fileID: 2100000, guid: f8a1db6f63a564a5197e6f3411913d02, type: 2}
   climberHex: {fileID: 0}
   climber: {fileID: 2100000, guid: 51258e7bacefb48ba9e0f3fa5fe401b4, type: 2}
@@ -694,7 +694,6 @@ MonoBehaviour:
   size: 4
   xqOffSet: 1.7320508
   zrOffset: 1.5
-  xrOffset: 2
 --- !u!114 &539253142
 MonoBehaviour:
   m_ObjectHideFlags: 0
