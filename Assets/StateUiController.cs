@@ -17,6 +17,10 @@ public class StateUiController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         text.text = board.currentStep + " - " + board.currentPlayer;
+        Player? winner = Rules.CheckWinningCondition(board);
+        if(winner != null){
+            text.text = winner + " won the game";
+        }
 	}
 
 }

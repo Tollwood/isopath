@@ -1,17 +1,22 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class BoardFactory : MonoBehaviour
 {
     public GameObject hexagonPrefab;
     public GameObject stonePrefab;
+    public Material hill;
+    public Material ground;
     public Material underground;
+    public Material climberHex;
     public Material climber;
     public Material digger;
     public Material hoverMaterial;
     public int size;
 
-                          // TODO extract offset
+    public float xqOffSet = 1.7320508f;
     public float zrOffset = 1.5f;
+
     internal Board create()
     {
         Board board = new Board(size);
@@ -42,14 +47,31 @@ public class BoardFactory : MonoBehaviour
         return board;
     }
 
+    public Material LevelToMaterial(TileLevel level)
+    {
+        Material newMaterial;
+        switch (level)
+        {
+            case TileLevel.HILL:
+                newMaterial =  hill;
+                break;
+            case TileLevel.GROUND:
+                newMaterial = ground;
+                break;
+            default:
+                newMaterial = underground;
+                break;
+        }
+        return newMaterial;
+    }
+
     private GameObject addHexagon(Coord coord, Vector3 position, TileLevel tileLevel)
     {
         GameObject hexagonGo = Instantiate(hexagonPrefab, position, Quaternion.Euler(new Vector3(0, 0, 0)));
         Hexagon hexagon = hexagonGo.GetComponent<Hexagon>();
-        if(tileLevel == TileLevel.UNDERGROUND){
-            hexagon.SetOriginalMaterial(underground);    
-        }
+
         hexagon.coord = coord;
+        hexagon.SetOriginalMaterial(LevelToMaterial(tileLevel));
         hexagon.hoverMaterial = hoverMaterial;
         return hexagonGo;
     }
@@ -80,13 +102,13 @@ public class BoardFactory : MonoBehaviour
         switch (tileLevel)
         {
             case TileLevel.HILL:
-                stoneOffset = 1.2f;
+                stoneOffset = 0.6f;
                 break;
             default:
-                stoneOffset = 0.1f;
+                stoneOffset = 0.13f;
                 break;
         }
-        return new Vector3(coord.q * 2 +  coord.r, stoneOffset, zrOffset * coord.r);
+        return new Vector3(coord.q * xqOffSet +  coord.r, stoneOffset, zrOffset * coord.r);
     }
 
     public Vector3 GetPositionForHexagon(Coord coord, TileLevel tileLevel)
@@ -95,15 +117,15 @@ public class BoardFactory : MonoBehaviour
         switch (tileLevel)
         {
             case TileLevel.HILL:
-                tileLevelOffSet = 1f;
+                tileLevelOffSet = 0.3f;
                 break;
             case TileLevel.GROUND:
-                tileLevelOffSet = 0.5f;
+                tileLevelOffSet = 0.1f;
                 break;
             default:
                 tileLevelOffSet = 0f;
                 break;
         }
-        return new Vector3(coord.q * 2 +  coord.r, tileLevelOffSet, zrOffset * coord.r);
+        return new Vector3(coord.q * xqOffSet +  coord.r, tileLevelOffSet, zrOffset * coord.r);
     }
 }

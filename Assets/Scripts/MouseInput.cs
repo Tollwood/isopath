@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class MouseInput: MonoBehaviour {
 
@@ -9,26 +8,46 @@ public class MouseInput: MonoBehaviour {
     private Plane dragPlane = new Plane(Vector3.up, new Vector3(0, 3, 0));
     private Vector3 dragScale = new Vector3(.5f, .5f, .5f);
     private Vector3 dragOffSet = new Vector3(0, 0, 1);
-    private Board board;
-    private BoardFactory boardFactory;
+    private BoardUi boardUi;
 
     private void Start()
     {
-        board = FindObjectOfType<Game>().board;   
+        boardUi = FindObjectOfType<BoardUi>();
     }
 
     void Update()
     {
-        if(Input.GetMouseButtonDown(0))
-            startDragging();
-        
-        if(draggedObject != null)
-            draggedObject.position = GetDragPosition();
+        RaycastHit hit;
+        Ray ray = camera.ScreenPointToRay(Input.mousePosition);
+        bool hitting = Physics.Raycast(ray, out hit);
 
-        if (Input.GetMouseButtonUp(0) && draggedObject != null)
-            stopDragging();
+        if(Input.GetMouseButtonDown(0) && hitting){
+            startDragging(hit.transform);
+        } else if (Input.GetMouseButtonUp(0) && isDragging()){
+            if (hitting)
+            {
+                stopDragging(hit.transform);
+            }
+
+            draggedObject.transform.localScale = new Vector3(1, 1, 1);
+            draggedObject = null;
+
+        }
+        else if(isDragging()){
+            draggedObject.position = GetDragPosition();
+        } else if(hitting){
+            highlightInteractable(hit.transform);
+        }
     }
 
+    private void highlightInteractable(Transform element)
+    {
+        boardUi.MouseOver(element, isDragging());
+    }
+
+    private bool isDragging(){
+        return draggedObject != null;
+    }
     private Vector3 GetDragPosition()
     {
         float enterDist;
@@ -37,98 +56,34 @@ public class MouseInput: MonoBehaviour {
         return rayCast.GetPoint(enterDist) + dragOffSet;
     }
 
-    private void startDragging()
+    private void startDragging(Transform element)
     {
-        RaycastHit hit;
-        Ray ray = camera.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out hit))
+        Draggable draggable = element.GetComponent<Draggable>();
+        if (draggable != null && draggable.isDraggable())
         {
-            Draggable draggable = hit.transform.parent.GetComponent<Draggable>();
-            if (draggable != null && draggable.isDraggable())
-            {
-                draggedObject = hit.transform.parent;
-                startPosition = draggedObject.position;
-                draggedObject.transform.localScale = dragScale;
-            }
+            draggedObject = element;
+            startPosition = draggedObject.position;
+            draggedObject.transform.localScale = dragScale;
         }
     }
 
-    private void stopDragging()
+    private void stopDragging(Transform element)
     {
-        RaycastHit hit;
-        Ray ray = camera.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out hit))
-        {
-            Hexagon to = hit.transform.parent.GetComponent<Hexagon>();
+     
+            Hexagon to = element.GetComponent<Hexagon>();
             if (to != null)
             {
                 Hexagon draggingHexagon = draggedObject.GetComponent<Hexagon>();
-                if (draggingHexagon != null)
+                if (draggingHexagon != null && !boardUi.placeHexagon(draggingHexagon, to))
                 {
-                    if (!placeHexagon(draggingHexagon, to))
-                    {
-                        draggedObject.position = startPosition;
-                    }
+                    draggedObject.position = startPosition;
                 }
 
                 Stone draggingStone = draggedObject.GetComponent<Stone>();
-                if (draggingStone != null)
+                if (draggingStone != null && !boardUi.placeStone(draggingStone, to))                    
                 {
-                    if (!placeStone(draggingStone, to))
-                    {
-                        draggedObject.position = startPosition;
-                    }
+                    draggedObject.position = startPosition;
                 }
             }
-        }
-        draggedObject.transform.localScale = new Vector3(1, 1, 1);
-        draggedObject = null;
-    }
-
-    private bool placeStone(Stone stone, Hexagon to)
-    {
-        Tile fromTile = board.coordToTile(stone.coord);
-        Tile toTile = board.coordToTile(to.coord);
-        if (board.moveStone(fromTile, toTile)){
-            Vector3 toPosition = getBoardFactory().GetPositionForStone(to.coord, to.getTile().level);
-            stone.transform.position = toPosition;
-            stone.coord = to.coord;
-            board.currentStep = Step.BUILD;
-            board.nextPlayer();
-            return true;
-        }
-        return false;
-    }
-
-    private bool placeHexagon(Hexagon from, Hexagon to)
-    {
-        Tile fromTile = board.coordToTile(from.coord);
-        Tile toTile = board.coordToTile(to.coord);
-        if (board.build(fromTile, toTile))
-        {
-            if (board.canMoveStoneAnyWhere())
-            {
-                Vector3 toPosition = getBoardFactory().GetPositionForHexagon(to.coord, to.getTile().level);
-                from.transform.position = toPosition;
-                from.coord = to.coord;
-                board.currentStep = Step.MOVE;
-                return true;
-            }
-            else
-            {
-                board.build(toTile, fromTile);
-                draggedObject.position = startPosition;
-            }
-        }
-        return false;
-    }
-
-    private BoardFactory getBoardFactory()
-    {
-        if (boardFactory == null)
-        {
-            boardFactory = FindObjectOfType<BoardFactory>();
-        }
-        return boardFactory;
     }
 }

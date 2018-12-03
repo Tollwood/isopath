@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 public class Tile
 {
@@ -27,5 +28,10 @@ public class Tile
 
     public List<Coord> GetNeighbors(){
         return neighbors;
+    }
+
+    internal bool isNeighbour(Tile toTile)
+    {
+        return GetNeighbors().Contains(toTile.coord);
     }
 }

@@ -11,7 +11,7 @@ public class Stone : MonoBehaviour, Draggable{
 
     private void Awake()
     {
-        meshRenderer = GetComponentInChildren<MeshRenderer>();
+        meshRenderer = GetComponent<MeshRenderer>();
     }
 
     private void Start()
@@ -22,9 +22,9 @@ public class Stone : MonoBehaviour, Draggable{
 
     internal void OnMouseEnter()
     {
-        //if(board.canMoveStone(coord)){
-        meshRenderer.material = hoverMaterial;
-        //}
+        if(Rules.canMoveStone(board,coord)){
+            meshRenderer.material = hoverMaterial;
+        }
     }
 
     internal void OnMouseExit()
@@ -39,7 +39,7 @@ public class Stone : MonoBehaviour, Draggable{
 
     public bool isDraggable()
     {
-        return board.canMoveStone(coord);
+        return Rules.canMoveStone(board,coord);
     }
 
     public Tile getTile(){
