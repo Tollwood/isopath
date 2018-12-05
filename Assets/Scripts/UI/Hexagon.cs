@@ -41,7 +41,8 @@ public class Hexagon : MonoBehaviour, Draggable{
 
     internal void Highlight()
     {
-        meshRenderer.material = hoverMaterial;
-        Debug.Log(coord);
+        hoverMaterial = originalMaterial;
+        Color color = hoverMaterial.color;
+        meshRenderer.material = hoverMaterial; 
     }
 }

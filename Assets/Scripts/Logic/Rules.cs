@@ -216,7 +216,7 @@ public class Rules {
         {
             int homeRowR = board.currentPlayer == Player.DIGGER ? board.boardSize - 1 : -1 * (board.boardSize - 1);
             bool isHomeRow = tile.coord.r == homeRowR;
-            return board.currentStep == Step.BUILD && !tile.occupiat && !isHomeRow;
+            return board.currentStep == Step.BUILD && !tile.occupiat && !isHomeRow && tile.level != TileLevel.UNDERGROUND;
         }
         return false;
     }

@@ -4,11 +4,10 @@
 public class CameraOrbit : MonoBehaviour
 {
 
-    protected Transform _XForm_Camera;
     protected Transform _XForm_Parent;
 
-    public Vector2 _LocalRotation = new Vector2(0,90);
-    public float _CameraDistance = 10f;
+    public Vector2 _LocalRotation = new Vector2(0,40);
+    public float minYRotation = 35f;
 
     public float MouseSensitivity = 4f;
     public float ScrollSensitvity = 2f;
@@ -17,10 +16,14 @@ public class CameraOrbit : MonoBehaviour
 
     public bool CameraDisabled = false;
 
+    public float _fieldOfView = 10f;
     public float zoomOutMin = 1.5f;
+    public float zoomInitial = 71f;
     public float zoomOutMax = 20f;
+    public float zoomSpeed = .1f;
 
-    public float minYRotation = 35f;
+    public bool shouldOrbit = true;
+
     private new Camera camera;
 
     private void Awake()
@@ -31,29 +34,41 @@ public class CameraOrbit : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        this._XForm_Camera = this.transform;
         this._XForm_Parent = this.transform.parent;
+        _fieldOfView = zoomInitial;
     }
 
 
     void LateUpdate()
     {
-        if (Input.touchCount == 3)
-        {
-            HandleTouchRotation();
+        if (shouldOrbit){
+            OrbitCamera();    
         }
-        if (Input.touchCount == 2)
-        {
-            HandleTouchZoom();
-        }
-        else if (Input.GetMouseButton(1))
-        {
-            HandleMouseRotation();
-            HandleMouseZoom();
-        }
+        else {
+            if (Input.touchCount == 3)
+            {
+                HandleTouchRotation();
+            }
+            if (Input.touchCount == 2)
+            {
+                HandleTouchZoom();
+            }
+            else if (Input.GetMouseButton(1))
+            {
+                HandleMouseRotation();
+                HandleMouseZoom();
+            }
+            if (Input.GetKeyDown(KeyCode.Q))
+            {
+                zoom(-.5f);
+            }
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                zoom(.5f);
+            }
 
+        }
         ClampRotation();
-
         MoveCameraRig();
     }
 
@@ -63,9 +78,9 @@ public class CameraOrbit : MonoBehaviour
         Quaternion QT = Quaternion.Euler(_LocalRotation.y, _LocalRotation.x, 0);
         this._XForm_Parent.rotation = Quaternion.Lerp(this._XForm_Parent.rotation, QT, Time.deltaTime * OrbitDampening);
 
-        if (this._XForm_Camera.localPosition.z != this._CameraDistance * -1f)
+        if (camera.fieldOfView != this._fieldOfView )
         {
-            this._XForm_Camera.localPosition = new Vector3(0f, 0f, Mathf.Lerp(this._XForm_Camera.localPosition.z, this._CameraDistance * -1f, Time.deltaTime * ScrollDampening));
+            camera.fieldOfView = Mathf.Lerp(camera.fieldOfView, this._fieldOfView , Time.deltaTime * ScrollDampening);
         }
     }
 
@@ -119,10 +134,25 @@ public class CameraOrbit : MonoBehaviour
     }
 
     private void zoom(float increment){
-        increment *= (this._CameraDistance * 0.3f);
+        increment *= (this._fieldOfView * zoomSpeed);
 
-        this._CameraDistance += increment * -1f;
+        this._fieldOfView += increment * -1f;
 
-        this._CameraDistance = Mathf.Clamp(this._CameraDistance, zoomOutMin, zoomOutMax);
+        this._fieldOfView = Mathf.Clamp(this._fieldOfView, zoomOutMin, zoomOutMax);
+    }
+
+    public void Reset()
+    {
+        _LocalRotation.y = 90f;
+        _LocalRotation.x = 0f;
+
+        _fieldOfView = zoomInitial;
+    }
+
+    private void OrbitCamera()
+    {
+        _LocalRotation.y = 40f;
+        _LocalRotation.x += Time.deltaTime * 3;
+
     }
 }

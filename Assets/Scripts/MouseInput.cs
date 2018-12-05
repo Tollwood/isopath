@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 public class MouseInput: MonoBehaviour {
 
@@ -7,7 +8,7 @@ public class MouseInput: MonoBehaviour {
     private Vector3 startPosition;
     private Plane dragPlane = new Plane(Vector3.up, new Vector3(0, 3, 0));
     private Vector3 dragScale = new Vector3(.5f, .5f, .5f);
-    private Vector3 dragOffSet = new Vector3(0, 0, 1);
+    private Vector3 dragOffSet = new Vector3(0, 0, 0);
     private BoardUi boardUi;
 
     private void Start()
@@ -17,25 +18,79 @@ public class MouseInput: MonoBehaviour {
 
     void Update()
     {
+        if(Input.touchSupported){
+            handleTouch();
+        }
+        else{
+            handleMouseInput();
+        }
+
+    }
+
+    private void handleTouch()
+    {
         RaycastHit hit;
         Ray ray = camera.ScreenPointToRay(Input.mousePosition);
         bool hitting = Physics.Raycast(ray, out hit);
 
-        if(Input.GetMouseButtonDown(0) && hitting){
+        if (Input.touchCount == 1 && hitting && !isDragging())
+        {
             startDragging(hit.transform);
-        } else if (Input.GetMouseButtonUp(0) && isDragging()){
+        }
+        else if(Input.touchCount > 1 && isDragging()){
+            draggedObject.position = startPosition;
+        }
+        else if(Input.touchCount == 1 && isDragging()){
+            draggedObject.position = GetDragPosition();
+        }
+        else if (Input.touchCount == 0 && isDragging())
+        {
+            if (hitting) {
+                stopDragging(hit.transform);
+            }
+            else
+            {
+                draggedObject.position = startPosition;
+            }
+
+            draggedObject.transform.localScale = new Vector3(1, 1, 1);
+            draggedObject.GetComponent<Collider>().enabled = true;
+            draggedObject = null;
+
+        }
+    }
+
+
+    private void handleMouseInput()
+    {
+        RaycastHit hit;
+        Ray ray = camera.ScreenPointToRay(Input.mousePosition);
+        bool hitting = Physics.Raycast(ray, out hit);
+
+        if (Input.GetMouseButtonDown(0) && hitting)
+        {
+            startDragging(hit.transform);
+        }
+        else if (Input.GetMouseButtonUp(0) && isDragging())
+        {
             if (hitting)
             {
                 stopDragging(hit.transform);
             }
-
+            else {
+                draggedObject.position = startPosition;    
+            }
+            Cursor.visible = true;
             draggedObject.transform.localScale = new Vector3(1, 1, 1);
+            draggedObject.GetComponent<Collider>().enabled = true;
             draggedObject = null;
-
         }
-        else if(isDragging()){
+        else if (isDragging())
+        {
             draggedObject.position = GetDragPosition();
-        } else if(hitting){
+        }
+        else if (hitting)
+        {
             highlightInteractable(hit.transform);
         }
     }
@@ -64,6 +119,8 @@ public class MouseInput: MonoBehaviour {
             draggedObject = element;
             startPosition = draggedObject.position;
             draggedObject.transform.localScale = dragScale;
+            Cursor.visible = false;
+            draggedObject.GetComponent<Collider>().enabled = false;
         }
     }
 
