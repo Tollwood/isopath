@@ -17,9 +17,20 @@ public class BoardFactory : MonoBehaviour
     public float xqOffSet = 1.7320508f;
     public float zrOffset = 1.5f;
 
+    public Transform uiContainer;
+
+    Board board;
+
+    private void Awake()
+    {
+        uiContainer = Instantiate(new GameObject(), new Vector3(0, 0, 0), Quaternion.Euler(new Vector3(0, 0, 0))).transform;
+        uiContainer.name = "boardElements";
+    }
+
     internal Board create()
     {
-        Board board = new Board(size);
+        
+        board = new Board(size);
 
         foreach (Coord coord in board.tiles.Keys)
         {
@@ -67,7 +78,7 @@ public class BoardFactory : MonoBehaviour
 
     private GameObject addHexagon(Coord coord, Vector3 position, TileLevel tileLevel)
     {
-        GameObject hexagonGo = Instantiate(hexagonPrefab, position, Quaternion.Euler(new Vector3(0, 0, 0)));
+        GameObject hexagonGo = Instantiate(hexagonPrefab, position, Quaternion.Euler(new Vector3(0, 0, 0)),uiContainer);
         Hexagon hexagon = hexagonGo.GetComponent<Hexagon>();
 
         hexagon.coord = coord;
@@ -89,7 +100,7 @@ public class BoardFactory : MonoBehaviour
                 break;
         }
 
-        GameObject stoneGo = Instantiate(stonePrefab, position, Quaternion.Euler(new Vector3(0, 0, 0)));
+        GameObject stoneGo = Instantiate(stonePrefab, position, Quaternion.Euler(new Vector3(0, 0, 0)), uiContainer);
         Stone stone = stoneGo.GetComponent<Stone>();
         stone.SetOriginalMaterial(stoneMaterial);
         stone.hoverMaterial = hoverMaterial;
@@ -127,5 +138,13 @@ public class BoardFactory : MonoBehaviour
                 break;
         }
         return new Vector3(coord.q * xqOffSet +  coord.r, tileLevelOffSet, zrOffset * coord.r);
+    }
+
+    public Board Restart(){
+        foreach (Transform child in uiContainer)
+        {
+            Destroy(child.gameObject);
+        }
+        return create();
     }
 }

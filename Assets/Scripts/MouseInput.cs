@@ -10,14 +10,18 @@ public class MouseInput: MonoBehaviour {
     private Vector3 dragScale = new Vector3(.5f, .5f, .5f);
     private Vector3 dragOffSet = new Vector3(0, 0, 0);
     private BoardUi boardUi;
-
+    private Game game;
     private void Start()
     {
         boardUi = FindObjectOfType<BoardUi>();
+        game = FindObjectOfType<Game>();
     }
 
     void Update()
     {
+        if(!game.isPlaying){
+            return;
+        }
         if(Input.touchSupported){
             handleTouch();
         }

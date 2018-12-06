@@ -2,26 +2,26 @@
 
 public class BoardUi : MonoBehaviour{
     
-    private Board board;
+    private Game game;
     private BoardFactory boardFactory;
 
     private void Start()
     {
-        board = FindObjectOfType<Game>().board;
+        game = FindObjectOfType<Game>();
         boardFactory = FindObjectOfType<BoardFactory>();
     }
 
     public bool placeStone(Stone stone, Hexagon to)
     {
-        Tile fromTile = board.coordToTile(stone.coord);
-        Tile toTile = board.coordToTile(to.coord);
-        if (Rules.moveStone(board, fromTile, toTile))
+        Tile fromTile = game.board.coordToTile(stone.coord);
+        Tile toTile = game.board.coordToTile(to.coord);
+        if (Rules.moveStone(game.board, fromTile, toTile))
         {
             Vector3 toPosition = boardFactory.GetPositionForStone(to.coord, to.getTile().level);
             stone.transform.position = toPosition;
             stone.coord = to.coord;
-            board.currentStep = Step.BUILD;
-            Rules.nextPlayer(board);
+            game.board.currentStep = Step.BUILD;
+            Rules.nextPlayer(game.board);
             return true;
         }
         return false;
@@ -29,22 +29,22 @@ public class BoardUi : MonoBehaviour{
 
     public bool placeHexagon(Hexagon from, Hexagon to)
     {
-        Tile fromTile = board.coordToTile(from.coord);
-        Tile toTile = board.coordToTile(to.coord);
-        if (Rules.build(board, fromTile, toTile))
+        Tile fromTile = game.board.coordToTile(from.coord);
+        Tile toTile = game.board.coordToTile(to.coord);
+        if (Rules.build(game.board, fromTile, toTile))
         {
-            if (Rules.canMoveStoneAnyWhere(board))
+            if (Rules.canMoveStoneAnyWhere(game.board))
             {
                 Vector3 toPosition = boardFactory.GetPositionForHexagon(to.coord, to.getTile().level);
                 from.transform.position = toPosition;
                 from.coord = to.coord;
                 from.SetOriginalMaterial(boardFactory.LevelToMaterial(toTile.level));
-                board.currentStep = Step.MOVE;
+                game.board.currentStep = Step.MOVE;
                 return true;
             }
             else
             {
-                Rules.build(board, toTile, fromTile);
+                Rules.build(game.board, toTile, fromTile);
             }
         }
         return false;
@@ -54,7 +54,7 @@ public class BoardUi : MonoBehaviour{
     {
         Hexagon to = element.GetComponent<Hexagon>();
         TileLevel notAllowed = dragging ? TileLevel.HILL : TileLevel.UNDERGROUND;
-        if (to != null && Rules.canMoveTile(board, to.coord) && to.getTile().level != notAllowed )
+        if (to != null && Rules.canMoveTile(game.board, to.coord) && to.getTile().level != notAllowed )
         {
             to.Highlight();
         }

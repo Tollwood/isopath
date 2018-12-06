@@ -8,7 +8,7 @@ public class Hexagon : MonoBehaviour, Draggable{
     public Material originalMaterial;
     private MeshRenderer meshRenderer;
     public Coord coord;
-    private Board board;
+    private Game game;
 
     private void Awake()
     {
@@ -18,7 +18,7 @@ public class Hexagon : MonoBehaviour, Draggable{
     private void Start()
     {
         originalMaterial = meshRenderer.material;
-        board = FindObjectOfType<Game>().board;
+        game = FindObjectOfType<Game>();
     }
 
     public void SetOriginalMaterial(Material originalMaterial){
@@ -32,11 +32,11 @@ public class Hexagon : MonoBehaviour, Draggable{
 
     public bool isDraggable()
     {
-        return Rules.canMoveTile(board,coord);
+        return Rules.canMoveTile(game.board,coord);
     }
 
     public Tile getTile(){
-        return board.coordToTile(coord);
+        return game.board.coordToTile(coord);
     }
 
     internal void Highlight()

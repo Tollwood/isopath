@@ -7,7 +7,7 @@ public class Stone : MonoBehaviour, Draggable{
     private Material originalMaterial;
     private MeshRenderer meshRenderer;
     public Coord coord;
-    private Board board;
+    private Game game;
 
     private void Awake()
     {
@@ -17,12 +17,12 @@ public class Stone : MonoBehaviour, Draggable{
     private void Start()
     {
         originalMaterial = meshRenderer.material;
-        board = FindObjectOfType<Game>().board;
+        game = FindObjectOfType<Game>();
     }
 
     internal void OnMouseEnter()
     {
-        if(Rules.canMoveStone(board,coord)){
+        if(Rules.canMoveStone(game.board,coord)){
             meshRenderer.material = hoverMaterial;
         }
     }
@@ -39,10 +39,10 @@ public class Stone : MonoBehaviour, Draggable{
 
     public bool isDraggable()
     {
-        return Rules.canMoveStone(board,coord);
+        return Rules.canMoveStone(game.board,coord);
     }
 
     public Tile getTile(){
-        return board.coordToTile(coord);
+        return game.board.coordToTile(coord);
     }
 }

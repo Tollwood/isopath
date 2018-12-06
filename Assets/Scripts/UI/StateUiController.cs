@@ -1,23 +1,21 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using TMPro;
+﻿using TMPro;
 using UnityEngine;
 
 [RequireComponent(typeof(TextMeshProUGUI))]
 public class StateUiController : MonoBehaviour {
 
     private TextMeshProUGUI text;
-    private Board board;
+    private Game game;
     // Use this for initialization
 	void Start () {
         text = GetComponent<TextMeshProUGUI>();
-        board = FindObjectOfType<Game>().board;
+        game = FindObjectOfType<Game>();
 	}
 	
 	// Update is called once per frame
 	void Update () {
-        text.text = board.currentStep + " - " + board.currentPlayer;
-        Player? winner = Rules.CheckWinningCondition(board);
+        text.text = game.board.currentStep + " - " + game.board.currentPlayer;
+        Player? winner = Rules.CheckWinningCondition(game.board);
         if(winner != null){
             text.text = winner + " won the game";
         }
