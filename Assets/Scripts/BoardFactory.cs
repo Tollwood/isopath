@@ -12,7 +12,6 @@ public class BoardFactory : MonoBehaviour
     public Material climber;
     public Material digger;
     public Material hoverMaterial;
-    public int size;
 
     public float xqOffSet = 1.7320508f;
     public float zrOffset = 1.5f;
@@ -27,31 +26,32 @@ public class BoardFactory : MonoBehaviour
         uiContainer.name = "boardElements";
     }
 
-    internal Board create()
+    internal Board create(GameConfig gameConfig)
     {
         
-        board = new Board(size);
+        board = new Board(gameConfig.size, BoardStateModifier.ResetTiles(gameConfig.size));
 
-        foreach (Coord coord in board.tiles.Keys)
+        foreach (Tile tile in board.tiles)
         {
-            Tile tile;
-            board.tiles.TryGetValue(coord, out tile);
+            if(tile == null){
+                continue;
+            }
             if (tile.level == TileLevel.UNDERGROUND)
             {
-                addHexagon(coord, GetPositionForHexagon(coord,TileLevel.UNDERGROUND),TileLevel.UNDERGROUND);
-                addStone(coord,TileLevel.UNDERGROUND,GetPositionForStone(coord,TileLevel.UNDERGROUND));
+                addHexagon(tile.coord, GetPositionForHexagon(tile.coord,TileLevel.UNDERGROUND),TileLevel.UNDERGROUND);
+                addStone(tile.coord,TileLevel.UNDERGROUND,GetPositionForStone(tile.coord,TileLevel.UNDERGROUND));
             }
             if (tile.level == TileLevel.GROUND)
             {
-                addHexagon(coord, GetPositionForHexagon(coord, TileLevel.UNDERGROUND),TileLevel.UNDERGROUND);
-                addHexagon(coord, GetPositionForHexagon(coord, TileLevel.GROUND),TileLevel.GROUND);
+                addHexagon(tile.coord, GetPositionForHexagon(tile.coord, TileLevel.UNDERGROUND),TileLevel.UNDERGROUND);
+                addHexagon(tile.coord, GetPositionForHexagon(tile.coord, TileLevel.GROUND),TileLevel.GROUND);
             }
             if (tile.level == TileLevel.HILL)
             {
-                addHexagon(coord, GetPositionForHexagon(coord, TileLevel.UNDERGROUND),TileLevel.UNDERGROUND);
-                addHexagon(coord, GetPositionForHexagon(coord, TileLevel.GROUND),TileLevel.GROUND);
-                addHexagon(coord, GetPositionForHexagon(coord, TileLevel.HILL),TileLevel.HILL);
-                addStone(coord,tile.level, GetPositionForStone(coord,tile.level));
+                addHexagon(tile.coord, GetPositionForHexagon(tile.coord, TileLevel.UNDERGROUND),TileLevel.UNDERGROUND);
+                addHexagon(tile.coord, GetPositionForHexagon(tile.coord, TileLevel.GROUND),TileLevel.GROUND);
+                addHexagon(tile.coord, GetPositionForHexagon(tile.coord, TileLevel.HILL),TileLevel.HILL);
+                addStone(tile.coord,tile.level, GetPositionForStone(tile.coord,tile.level));
             }
         }
 
@@ -119,10 +119,34 @@ public class BoardFactory : MonoBehaviour
                 stoneOffset = 0.13f;
                 break;
         }
-        return new Vector3(coord.q * xqOffSet +  coord.r, stoneOffset, zrOffset * coord.r);
+        return new Vector3( xqOffSet * (coord.q +  coord.r - 4.279f)- coord.r, stoneOffset, zrOffset * (coord.r -3) );
     }
 
     public Vector3 GetPositionForHexagon(Coord coord, TileLevel tileLevel)
+    {
+        return new Vector3( xqOffSet  * (coord.q +  coord.r -4.279f) - coord.r, GetTileLevelOffset(tileLevel), zrOffset * (coord.r - 3 ) );
+    }
+
+    public Board Restart(GameConfig gameConfig){
+        foreach (Transform child in uiContainer)
+        {
+            Destroy(child.gameObject);
+        }
+        return create(gameConfig);
+    }
+
+    public Draggable findByTile(Tile tile){
+        foreach (Transform child in uiContainer)
+        {
+            Draggable draggable = child.GetComponent<Draggable>();
+            if(draggable.GetCoord().Equals(tile.coord) && child.position.y == GetTileLevelOffset(tile.level)){
+                return draggable;
+            }
+        }
+        throw new Exception("Draggable for tile " + tile + " not found");
+    }
+
+    private float GetTileLevelOffset(TileLevel tileLevel)
     {
         float tileLevelOffSet;
         switch (tileLevel)
@@ -137,14 +161,6 @@ public class BoardFactory : MonoBehaviour
                 tileLevelOffSet = 0f;
                 break;
         }
-        return new Vector3(coord.q * xqOffSet +  coord.r, tileLevelOffSet, zrOffset * coord.r);
-    }
-
-    public Board Restart(){
-        foreach (Transform child in uiContainer)
-        {
-            Destroy(child.gameObject);
-        }
-        return create();
+        return tileLevelOffSet;
     }
 }

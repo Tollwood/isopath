@@ -682,7 +682,8 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
+  m_Children:
+  - {fileID: 759871003}
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -928,6 +929,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainMenu: {fileID: 585913174}
   gameInfo: {fileID: 1514245606}
+  gameConfig:
+    size: 4
+    aiDigger: 1
+    aiClimber: 1
 --- !u!4 &539253139
 Transform:
   m_ObjectHideFlags: 0
@@ -971,11 +976,10 @@ MonoBehaviour:
   hill: {fileID: 2100000, guid: 97827114d413d426d85c90f16c22029c, type: 2}
   ground: {fileID: 2100000, guid: 109e5635036114c68bc08132f5790eed, type: 2}
   underground: {fileID: 2100000, guid: f8a1db6f63a564a5197e6f3411913d02, type: 2}
-  climberHex: {fileID: 0}
+  climberHex: {fileID: 2100000, guid: 97827114d413d426d85c90f16c22029c, type: 2}
   climber: {fileID: 2100000, guid: 51258e7bacefb48ba9e0f3fa5fe401b4, type: 2}
   digger: {fileID: 2100000, guid: 7bd1acfb01df541d0b16e199c723cfb7, type: 2}
   hoverMaterial: {fileID: 2100000, guid: cd130d25cbae24a46942e1a5fe8cfa0d, type: 2}
-  size: 4
   xqOffSet: 1.7320508
   zrOffset: 1.5
   uiContainer: {fileID: 0}
@@ -1043,6 +1047,91 @@ MonoBehaviour:
   newGameBttn: {fileID: 2126105182}
   continueGameBttn: {fileID: 1352334606}
   restartGameBttn: {fileID: 140495849}
+--- !u!1 &759871002
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 759871003}
+  - component: {fileID: 759871006}
+  - component: {fileID: 759871005}
+  - component: {fileID: 759871004}
+  m_Layer: 0
+  m_Name: Cube
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &759871003
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 759871002}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 362122995}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &759871004
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 759871002}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!23 &759871005
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 759871002}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 4294967295
+  m_Materials:
+  - {fileID: 10303, guid: 0000000000000000f000000000000000, type: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+--- !u!33 &759871006
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 759871002}
+  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &972187798
 GameObject:
   m_ObjectHideFlags: 0
@@ -2107,7 +2196,6 @@ GameObject:
   - component: {fileID: 2126105186}
   - component: {fileID: 2126105185}
   - component: {fileID: 2126105184}
-  - component: {fileID: 2126105187}
   m_Layer: 5
   m_Name: NewGameButton
   m_TagString: Untagged
@@ -2220,14 +2308,3 @@ CanvasRenderer:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2126105182}
   m_CullTransparentMesh: 0
---- !u!114 &2126105187
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 2126105182}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4077f2d9580364286b0b45c3c18704ed, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 

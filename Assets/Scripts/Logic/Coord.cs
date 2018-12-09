@@ -1,6 +1,7 @@
-﻿public class Coord {
-    public int r { get; private set; }
-    public int q { get; private set; }
+﻿[System.Serializable]
+public class Coord {
+    public int r;
+    public int q;
 
     public Coord(int q,int r){
         this.r = r;

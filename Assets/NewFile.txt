@@ -1,3 +1,5 @@
 ﻿https://www.redblobgames.com/grids/hexagons/
 rock http://spiralgraphics.biz/packs/terrain_rocky/index.htm?6
 grass http://spiralgraphics.biz/packs/plant_groundcover/index.htm?0#anchor
+
+pause Icon: https://www.flaticon.com/free-icon/pause-button_3918#term=pause%20button&page=1&position=23

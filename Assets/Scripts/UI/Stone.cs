@@ -43,6 +43,11 @@ public class Stone : MonoBehaviour, Draggable{
     }
 
     public Tile getTile(){
-        return game.board.coordToTile(coord);
+        return game.board.tiles[coord.q,coord.r];
+    }
+
+    public Coord GetCoord()
+    {
+        return coord;
     }
 }

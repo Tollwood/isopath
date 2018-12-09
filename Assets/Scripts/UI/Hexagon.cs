@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Hexagon : MonoBehaviour, Draggable{
     
@@ -36,7 +34,7 @@ public class Hexagon : MonoBehaviour, Draggable{
     }
 
     public Tile getTile(){
-        return game.board.coordToTile(coord);
+        return game.board.tiles[coord.q,coord.r];
     }
 
     internal void Highlight()
@@ -44,5 +42,11 @@ public class Hexagon : MonoBehaviour, Draggable{
         hoverMaterial = originalMaterial;
         Color color = hoverMaterial.color;
         meshRenderer.material = hoverMaterial; 
+        Debug.Log(coord);
+    }
+
+    public Coord GetCoord()
+    {
+        return coord;
     }
 }
