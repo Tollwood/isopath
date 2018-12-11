@@ -8,19 +8,28 @@ public class Rules {
 
     public static bool IsThreaten(Board board, Player player)
     {
-        Player enemy = player == Player.DIGGER ? Player.CLIMBER : Player.DIGGER;
+        Player opponent = GetOpponent(board.currentPlayer);
         foreach(Tile tile in board.tiles){
-            if(tile.occupiatBy == player && CountEnemyNeighbors(board,tile, enemy ) >= THREAT_THRESHHOLD){
+            if(tile.occupiatBy == player && CountEnemyNeighbors(board,tile, opponent ) >= THREAT_THRESHHOLD){
                 return true;
             }
         }
         return false;
     }
 
+    public static Player GetOpponent(Player player)
+    {
+        return player == Player.DIGGER ? Player.CLIMBER : Player.DIGGER;
+    }
+
     private static int CountEnemyNeighbors( Board board, Tile tile, Player enemy)
     {
         int count = 0;
         foreach(Coord neighborCoord in tile.GetNeighbors()){
+            if (neighborCoord.q >= board.tiles.GetLength(0) || neighborCoord.r >= board.tiles.GetLength(1))
+            {
+                continue;
+            }
             Tile neighborTile = board.tiles[neighborCoord.q,neighborCoord.r];
             if( neighborTile != null && neighborTile.occupiatBy == enemy){
                 count++;
@@ -106,13 +115,20 @@ public class Rules {
     {
         Tile tile = board.tiles[coord.q, coord.r];
         if (board.currentStep == Step.MOVE && tile.occupiatBy == board.currentPlayer){
+            // activate once ai knows how to teleport
+            //if(CanTeleport(board, tile)){
+            //    return true;
+            //}
             foreach (Coord neighborCoord in tile.GetNeighbors())
             {
                 if(neighborCoord.q >= board.tiles.GetLength(0) || neighborCoord.r >= board.tiles.GetLength(1)){
                     continue;
                 }
                 Tile neighbor = board.tiles[neighborCoord.q,neighborCoord.r];
-                if (neighbor != null && (Rules.canMoveStone(board, tile, neighbor)|| CanTeleport(board, tile)) )
+
+                bool moveOneStep = neighbor != null && neighbor.occupiatBy == null && neighbor.level == GetRequiredTileLevel(board.currentPlayer);
+
+                if (moveOneStep)
                 {
                     return true;
                 }
@@ -145,35 +161,41 @@ public class Rules {
             .Single();
 
         Tile teleportTile = board.tiles[teleportCoord.q,teleportCoord.r];
-        TileLevel requiredLevel = board.currentPlayer == Player.DIGGER ? TileLevel.UNDERGROUND : TileLevel.HILL;
+        TileLevel requiredLevel = GetRequiredTileLevel(board.currentPlayer);
         if(teleportTile != null && teleportTile.occupiatBy == null && teleportTile.level == requiredLevel ){
             return true;
         }
         return false;
     }
 
+    private static TileLevel GetRequiredTileLevel(Player player)
+    {
+        return player == Player.DIGGER ? TileLevel.UNDERGROUND : TileLevel.HILL;
+    }
+
     public static  bool canMoveStone(Board board, Tile fromTile, Tile toTile)
     {
         bool currentPlayerMoving = fromTile.occupiatBy == board.currentPlayer;
-        TileLevel toLevel = board.currentPlayer == Player.DIGGER ? TileLevel.UNDERGROUND : TileLevel.HILL;
-        if (currentPlayerMoving && toTile.occupiatBy == null && toTile.level == toLevel && (fromTile.isNeighbour(toTile) || teleport(board, fromTile,toTile))){
+        TileLevel toLevel = GetRequiredTileLevel(board.currentPlayer);
+        if (currentPlayerMoving && toTile.occupiatBy == null && toTile.level == toLevel && (fromTile.isNeighbour(toTile) || teleport(board.size, fromTile,toTile))){
             return true;
         }
         return false;
     }
 
-    public static  bool teleport(Board board, Tile fromTile, Tile toTile)
+    public static  bool teleport(int size, Tile fromTile, Tile toTile)
     {
-        int max = board.size - 1;
-        Coord topRightCoord = new Coord(-1 * max, max);
-        Coord topLeftCoord = new Coord(0, max);
+        int val = size - 1;
+        Coord topLeftCoord = new Coord(val, 0);
+        Coord topRightCoord = new Coord(val * 2, 0);
+
         // midle
-        Coord rightCoord = new Coord(max, 0);
-        Coord leftCoord = new Coord(-1 * max, 0);
+        Coord rightCoord = new Coord(val * 2, val);
+        Coord leftCoord = new Coord(0, val * 2);
 
         //bottom
-        Coord bottomRightCoord = new Coord(max, -1 * max);
-        Coord bottomLeftCoord = new Coord(0, -1 * max);
+        Coord bottomRightCoord = new Coord(val, val * 2);
+        Coord bottomLeftCoord = new Coord(0, val * 2);
 
         return matchTeleport(topRightCoord, topLeftCoord, fromTile, toTile)
         ||

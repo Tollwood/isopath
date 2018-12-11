@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Selector))]
@@ -20,6 +21,7 @@ public class Game : MonoBehaviour {
 
     private AiAgent aiClimber;
     private AiAgent aiDigger;
+    private bool thinking = false;
 
     void Awake () {
         selector = GetComponent<Selector>();
@@ -44,17 +46,26 @@ public class Game : MonoBehaviour {
     private void Update()
     {
         if(board != null){
-            if (aiClimber != null && board.currentStep == Step.BUILD && board.currentPlayer == Player.CLIMBER)
+            if (aiClimber != null && board.currentPlayer == Player.CLIMBER && !thinking)
             {
-                Move move = aiClimber.build(board);
-                build(move);
+                thinking = true;
+                StartCoroutine("AiMove", aiClimber);
             }
-            if (aiDigger != null && board.currentStep == Step.BUILD && board.currentPlayer == Player.DIGGER)
+            if (aiDigger != null && board.currentPlayer == Player.DIGGER && !thinking)
             {
-                Move move = aiDigger.build(board);
-                build(move);
+                thinking = true;
+                StartCoroutine("AiMove", aiDigger);
             }    
         }
+    }
+
+    IEnumerator AiMove(AiAgent agent){
+        yield return new WaitForSeconds(2f);
+        Moves nextMove = agent.GetNextMove(board);
+        build(nextMove.buildMove);
+        yield return new WaitForSeconds(2f);
+        MoveStone(nextMove.stoneMove);
+        thinking = false;
     }
 
     public void OnPause()
@@ -95,6 +106,14 @@ public class Game : MonoBehaviour {
         Hexagon fromHex = (Hexagon)boardFactory.findByTile(move.from);
         Hexagon toHex = (Hexagon)boardFactory.findByTile(move.to);
         boardUi.placeHexagon(fromHex, toHex);
+    }
+
+    private void MoveStone(Move move)
+    {
+        Debug.Log(move);
+        Stone stone = (Stone)boardFactory.findStoneByTile(move.from);
+        Hexagon toHex = (Hexagon)boardFactory.findByTile(move.to);
+        boardUi.placeStone(stone, toHex);
     }
 
     internal void MoveStone(Tile fromTile, Tile toTile)

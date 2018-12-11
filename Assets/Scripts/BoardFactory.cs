@@ -108,6 +108,18 @@ public class BoardFactory : MonoBehaviour
         return stoneGo;
     }
 
+    internal Stone findStoneByTile(Tile tile)
+    {
+        foreach (Transform child in uiContainer)
+        {
+            Stone stone = child.GetComponent<Stone>();
+            if (stone != null && stone.GetCoord().Equals(tile.coord)){
+                return stone;
+            }
+        }
+        throw new Exception("Draggable for tile " + tile + " not found");
+    }
+
     public Vector3 GetPositionForStone(Coord coord, TileLevel tileLevel){
         float stoneOffset;
         switch (tileLevel)
@@ -138,9 +150,9 @@ public class BoardFactory : MonoBehaviour
     public Draggable findByTile(Tile tile){
         foreach (Transform child in uiContainer)
         {
-            Draggable draggable = child.GetComponent<Draggable>();
-            if(draggable.GetCoord().Equals(tile.coord) && child.position.y == GetTileLevelOffset(tile.level)){
-                return draggable;
+            Hexagon hexagon = child.GetComponent<Hexagon>();
+            if(hexagon != null && hexagon.GetCoord().Equals(tile.coord) && child.position.y == GetTileLevelOffset(tile.level)){
+                return hexagon;
             }
         }
         throw new Exception("Draggable for tile " + tile + " not found");

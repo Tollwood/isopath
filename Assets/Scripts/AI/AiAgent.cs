@@ -2,16 +2,15 @@
 public class AiAgent
 {
     private Player player;
+    private int seed;
 
     public AiAgent(Player player){
         this.player = player;
+        this.seed = 1;
     }
 
-    public Move build(Board board){
-        return AiCalculator.calcBuild(board);
+    public Moves GetNextMove(Board board){
+        return AiCalculator.BestMove(board, seed);
     }
 
-    public Move moveStone(Board board){
-        return null;
-    }
 }
