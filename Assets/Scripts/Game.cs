@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections;
-using UnityEngine;
+﻿using UnityEngine;
 
 [RequireComponent(typeof(Selector))]
 [RequireComponent(typeof(BoardFactory))]
@@ -13,71 +11,36 @@ public class Game : MonoBehaviour {
     public Board board { get; private set; }
 
     private BoardFactory boardFactory;
-    private BoardUi boardUi;
 
     private CameraOrbit cameraOrbit;
-    public bool isPlaying { get; private set; }
+    public GameState gameState { get; private set; }
     private Selector selector;
 
-    private AiAgent aiClimber;
-    private AiAgent aiDigger;
-    private bool thinking = false;
 
     void Awake () {
         selector = GetComponent<Selector>();
         boardFactory = GetComponent<BoardFactory>();
-        boardUi = GetComponent<BoardUi>();
 	}
 
     private void Start()
     {
         cameraOrbit = FindObjectOfType<CameraOrbit>();
-        if(gameConfig.aiClimber){
-            aiClimber = new AiAgent(Player.CLIMBER);
-        }
-        if (gameConfig.aiDigger)
-        {
-            aiDigger = new AiAgent(Player.DIGGER);
-        }
         board = boardFactory.create(gameConfig);
-        isPlaying = false;
-    }
-
-    private void Update()
-    {
-        if(board != null){
-            if (aiClimber != null && board.currentPlayer == Player.CLIMBER && !thinking)
-            {
-                thinking = true;
-                StartCoroutine("AiMove", aiClimber);
-            }
-            if (aiDigger != null && board.currentPlayer == Player.DIGGER && !thinking)
-            {
-                thinking = true;
-                StartCoroutine("AiMove", aiDigger);
-            }    
-        }
-    }
-
-    IEnumerator AiMove(AiAgent agent){
-        yield return new WaitForSeconds(2f);
-        Moves nextMove = agent.GetNextMove(board);
-        build(nextMove.buildMove);
-        yield return new WaitForSeconds(2f);
-        MoveStone(nextMove.stoneMove);
-        thinking = false;
+        gameState = GameState.AI_PLAYING;
     }
 
     public void OnPause()
     {
         mainMenu.SetActive(true);
         gameInfo.SetActive(false);
+        gameState = GameState.PAUSED;
     }
 
     public void OnPlay()
     {
         mainMenu.SetActive(false);
         gameInfo.SetActive(true);
+        gameState = GameState.PLAYING;
     }
 
     public void OnNewGame()
@@ -86,13 +49,14 @@ public class Game : MonoBehaviour {
         gameInfo.SetActive(true);
         cameraOrbit.shouldOrbit = false;
         cameraOrbit.Reset();
-        isPlaying = true;
+        board = boardFactory.Restart(gameConfig);
+        gameState = GameState.PLAYING;
     }
 
-    public void OnRestart()
+    public void OnMainMenu()
     {
         board = boardFactory.Restart(gameConfig);
-        isPlaying = true;
+        gameState = GameState.AI_PLAYING;
     }
 
     public void build(Tile from, Tile to){
@@ -103,9 +67,7 @@ public class Game : MonoBehaviour {
     private void build(Move move)
     {
         Debug.Log(move);
-        Hexagon fromHex = (Hexagon)boardFactory.findByTile(move.from);
-        Hexagon toHex = (Hexagon)boardFactory.findByTile(move.to);
-        boardUi.placeHexagon(fromHex, toHex);
+        boardFactory.placeHexagon(move.from, move.to);
     }
 
     private void MoveStone(Move move)
@@ -113,7 +75,7 @@ public class Game : MonoBehaviour {
         Debug.Log(move);
         Stone stone = (Stone)boardFactory.findStoneByTile(move.from);
         Hexagon toHex = (Hexagon)boardFactory.findByTile(move.to);
-        boardUi.placeStone(stone, toHex);
+        boardFactory.placeStone(stone, toHex);
     }
 
     internal void MoveStone(Tile fromTile, Tile toTile)

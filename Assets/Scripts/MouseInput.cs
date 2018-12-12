@@ -9,17 +9,17 @@ public class MouseInput: MonoBehaviour {
     private Plane dragPlane = new Plane(Vector3.up, new Vector3(0, 3, 0));
     private Vector3 dragScale = new Vector3(.5f, .5f, .5f);
     private Vector3 dragOffSet = new Vector3(0, 0, 0);
-    private BoardUi boardUi;
+    private BoardFactory boardFactory;
     private Game game;
     private void Start()
     {
-        boardUi = FindObjectOfType<BoardUi>();
+        boardFactory = FindObjectOfType<BoardFactory>();
         game = FindObjectOfType<Game>();
     }
 
     void Update()
     {
-        if(!game.isPlaying){
+        if(game.gameState == GameState.PAUSED){
             return;
         }
         if(Input.touchSupported){
@@ -77,6 +77,7 @@ public class MouseInput: MonoBehaviour {
         }
         else if (Input.GetMouseButtonUp(0) && isDragging())
         {
+            Cursor.visible = true;
             if (hitting)
             {
                 stopDragging(hit.transform);
@@ -84,7 +85,6 @@ public class MouseInput: MonoBehaviour {
             else {
                 draggedObject.position = startPosition;    
             }
-            Cursor.visible = true;
             draggedObject.transform.localScale = new Vector3(1, 1, 1);
             draggedObject.GetComponent<Collider>().enabled = true;
             draggedObject = null;
@@ -101,7 +101,7 @@ public class MouseInput: MonoBehaviour {
 
     private void highlightInteractable(Transform element)
     {
-        boardUi.MouseOver(element, isDragging());
+        boardFactory.MouseOver(element, isDragging());
     }
 
     private bool isDragging(){
@@ -130,18 +130,18 @@ public class MouseInput: MonoBehaviour {
 
     private void stopDragging(Transform element)
     {
-     
+
             Hexagon to = element.GetComponent<Hexagon>();
             if (to != null)
             {
                 Hexagon draggingHexagon = draggedObject.GetComponent<Hexagon>();
-                if (draggingHexagon != null && !boardUi.placeHexagon(draggingHexagon, to))
+            if (draggingHexagon != null && !boardFactory.placeHexagon(draggingHexagon, to.getTile()))
                 {
                     draggedObject.position = startPosition;
                 }
 
                 Stone draggingStone = draggedObject.GetComponent<Stone>();
-                if (draggingStone != null && !boardUi.placeStone(draggingStone, to))                    
+                if (draggingStone != null && !boardFactory.placeStone(draggingStone, to))                    
                 {
                     draggedObject.position = startPosition;
                 }

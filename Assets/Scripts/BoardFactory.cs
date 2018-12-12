@@ -20,12 +20,18 @@ public class BoardFactory : MonoBehaviour
 
     Board board;
 
+    private Game game;
+
     private void Awake()
     {
         uiContainer = Instantiate(new GameObject(), new Vector3(0, 0, 0), Quaternion.Euler(new Vector3(0, 0, 0))).transform;
         uiContainer.name = "boardElements";
     }
 
+    private void Start()
+    {
+        game = FindObjectOfType<Game>();
+    }
     internal Board create(GameConfig gameConfig)
     {
         
@@ -174,5 +180,52 @@ public class BoardFactory : MonoBehaviour
                 break;
         }
         return tileLevelOffSet;
+    }
+
+    public bool placeStone(Stone stone, Hexagon to)
+    {
+        Tile fromTile = game.board.tiles[stone.coord.q, stone.coord.r];
+        Tile toTile = game.board.tiles[to.coord.q, to.coord.r];
+        if (Rules.canMoveStone(game.board, fromTile, toTile))
+        {
+            game.MoveStone(fromTile, toTile);
+            Vector3 toPosition = GetPositionForStone(to.coord, to.getTile().level);
+            stone.transform.position = toPosition;
+            stone.coord = to.coord;
+            return true;
+        }
+        return false;
+    }
+
+    public bool placeHexagon(Hexagon fromHex, Tile to)
+    {
+        if (Rules.canBuild(game.board, fromHex.getTile(), to))
+        {
+            game.build(fromHex.getTile(), to);
+            Tile newTo = game.board.tiles[to.coord.q, to.coord.r];
+            Vector3 toPosition = GetPositionForHexagon(newTo.coord,newTo.level);
+            fromHex.transform.position = toPosition;
+            fromHex.coord = newTo.coord;
+            fromHex.SetOriginalMaterial(LevelToMaterial(newTo.level));
+            return true;
+        }
+        return false;
+    }
+
+    public bool placeHexagon(Tile from, Tile to)
+    {
+        Hexagon fromHex = (Hexagon)findByTile(from);
+        return placeHexagon(fromHex, to);
+
+    }
+
+    internal void MouseOver(Transform element, bool dragging)
+    {
+        Hexagon hex = element.GetComponent<Hexagon>();
+        TileLevel notAllowed = dragging ? TileLevel.HILL : TileLevel.UNDERGROUND;
+        if (hex != null && Rules.canMoveTile(game.board, hex.coord) && hex.getTile().level != notAllowed)
+        {
+            hex.Highlight();
+        }
     }
 }

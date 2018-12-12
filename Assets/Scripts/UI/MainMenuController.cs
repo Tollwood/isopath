@@ -15,8 +15,8 @@ public class MainMenuController : MonoBehaviour {
 
     private void Update()
     {
-            newGameBttn.SetActive(!game.isPlaying);
-            continueGameBttn.SetActive(game.isPlaying);
-            restartGameBttn.SetActive(game.isPlaying);
+        newGameBttn.SetActive(game.gameState != GameState.PAUSED);
+        continueGameBttn.SetActive(game.gameState == GameState.PAUSED);
+        restartGameBttn.SetActive(game.gameState == GameState.PAUSED);
     }
 }

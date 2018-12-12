@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 140495852}
   - component: {fileID: 140495851}
   m_Layer: 5
-  m_Name: RestartButton
+  m_Name: MainMenuButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -190,7 +190,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 539253138}
-        m_MethodName: OnRestart
+        m_MethodName: OnMainMenu
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -909,7 +909,7 @@ GameObject:
   - component: {fileID: 539253141}
   - component: {fileID: 539253142}
   m_Layer: 0
-  m_Name: GameObject
+  m_Name: Game
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -930,8 +930,8 @@ MonoBehaviour:
   gameInfo: {fileID: 1514245606}
   gameConfig:
     size: 4
-    aiDigger: 1
-    aiClimber: 1
+    aiDigger: 0
+    aiClimber: 0
 --- !u!4 &539253139
 Transform:
   m_ObjectHideFlags: 0
@@ -990,7 +990,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 539253137}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e89d96250503548c5b56e304d9868b2d, type: 3}
+  m_Script: {fileID: 11500000, guid: 534bffb59dbdb4156ae635785993bcca, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &585913174
@@ -1126,7 +1126,7 @@ GameObject:
   - component: {fileID: 1054128560}
   - component: {fileID: 1054128559}
   m_Layer: 5
-  m_Name: RestartTxt
+  m_Name: MainMenuTxt
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1169,7 +1169,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_text: Restart
+  m_text: Main Menu
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2100000, guid: e73a58f6e2794ae7b1b7e50b7fb811b0, type: 2}
@@ -1237,10 +1237,10 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_textInfo:
     textComponent: {fileID: 1054128559}
-    characterCount: 7
+    characterCount: 9
     spriteCount: 0
-    spaceCount: 0
-    wordCount: 1
+    spaceCount: 1
+    wordCount: 2
     linkCount: 0
     lineCount: 1
     pageCount: 1
