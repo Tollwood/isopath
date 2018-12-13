@@ -19,7 +19,7 @@ public class MouseInput: MonoBehaviour {
 
     void Update()
     {
-        if(game.gameState == GameState.PAUSED){
+        if(game.gameState != GameState.PLAYING){
             return;
         }
         if(Input.touchSupported){

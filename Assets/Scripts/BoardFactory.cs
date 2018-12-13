@@ -137,12 +137,12 @@ public class BoardFactory : MonoBehaviour
                 stoneOffset = 0.13f;
                 break;
         }
-        return new Vector3( xqOffSet * (coord.q +  coord.r - 4.279f)- coord.r, stoneOffset, zrOffset * (coord.r -3) );
+        return new Vector3( xqOffSet * ((coord.q - (board.size -1) ) +  (coord.r - (board.size - 1)) )- (coord.r - (board.size - 1)), stoneOffset, zrOffset * (coord.r -(board.size-1)) );
     }
 
     public Vector3 GetPositionForHexagon(Coord coord, TileLevel tileLevel)
     {
-        return new Vector3( xqOffSet  * (coord.q +  coord.r -4.279f) - coord.r, GetTileLevelOffset(tileLevel), zrOffset * (coord.r - 3 ) );
+        return new Vector3( xqOffSet  * ((coord.q - (board.size - 1)) + (coord.r - (board.size - 1))) - (coord.r - (board.size - 1)), GetTileLevelOffset(tileLevel), zrOffset * (coord.r - (board.size-1) ) );
     }
 
     public Board Restart(GameConfig gameConfig){

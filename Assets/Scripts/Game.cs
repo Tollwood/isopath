@@ -3,9 +3,7 @@
 [RequireComponent(typeof(Selector))]
 [RequireComponent(typeof(BoardFactory))]
 public class Game : MonoBehaviour {
-
-    public GameObject mainMenu;
-    public GameObject gameInfo;
+    
     public GameConfig gameConfig = new GameConfig();
 
     public Board board { get; private set; }
@@ -29,36 +27,7 @@ public class Game : MonoBehaviour {
         gameState = GameState.AI_PLAYING;
     }
 
-    public void OnPause()
-    {
-        mainMenu.SetActive(true);
-        gameInfo.SetActive(false);
-        gameState = GameState.PAUSED;
-    }
-
-    public void OnPlay()
-    {
-        mainMenu.SetActive(false);
-        gameInfo.SetActive(true);
-        gameState = GameState.PLAYING;
-    }
-
-    public void OnNewGame()
-    {
-        mainMenu.SetActive(false);
-        gameInfo.SetActive(true);
-        cameraOrbit.shouldOrbit = false;
-        cameraOrbit.Reset();
-        board = boardFactory.Restart(gameConfig);
-        gameState = GameState.PLAYING;
-    }
-
-    public void OnMainMenu()
-    {
-        board = boardFactory.Restart(gameConfig);
-        gameState = GameState.AI_PLAYING;
-    }
-
+   
     public void build(Tile from, Tile to){
         Tile[,] tiles = BoardStateModifier.build( board.tiles, from, to);
         board = new Board(board.size, tiles, Step.MOVE, board.currentPlayer);
@@ -81,5 +50,30 @@ public class Game : MonoBehaviour {
     internal void MoveStone(Tile fromTile, Tile toTile)
     {
         board = BoardStateModifier.moveStone(board, fromTile, toTile);
+    }
+
+    // Buttons
+    public void Restart()
+    {
+        board = boardFactory.Restart(gameConfig);
+        gameState = GameState.AI_PLAYING;
+    }
+
+
+    public void OnPause()
+    {
+        gameState = GameState.PAUSED;
+    }
+
+    public void OnPlay()
+    {
+        gameState = GameState.PLAYING;
+    }
+
+    public void OnNewGame()
+    {
+        cameraOrbit.Reset();
+        board = boardFactory.Restart(gameConfig);
+        gameState = GameState.PLAYING;
     }
 }

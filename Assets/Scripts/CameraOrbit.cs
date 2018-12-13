@@ -147,6 +147,10 @@ public class CameraOrbit : MonoBehaviour
         _LocalRotation.x = 0f;
 
         _fieldOfView = zoomInitial;
+        shouldOrbit = false;
+    }
+    public void startOrbit(){
+        shouldOrbit = true;
     }
 
     private void OrbitCamera()
