@@ -74,17 +74,17 @@ public class Rules {
 
     public static Player? CheckWinningCondition(Board board)
     {
-        int diggerR = -1 * (board.size - 1);
-        int climberR =  board.size - 1;
+        int diggerHomeLine = Rules.homeLine(Player.DIGGER, board.size);
+        int climberHomeLine =  Rules.homeLine(Player.CLIMBER,board.size);
         foreach (Tile tile in board.tiles)
         {
             if(tile == null) continue;
             
-            if (tile.coord.r == diggerR&& tile.occupiatBy == Player.DIGGER)
+            if (tile.coord.r == climberHomeLine && tile.occupiatBy == Player.DIGGER)
             {
                 return Player.DIGGER;
             }
-            if (tile.coord.r == climberR && tile.occupiatBy == Player.CLIMBER)
+            if (tile.coord.r == diggerHomeLine && tile.occupiatBy == Player.CLIMBER)
             {
                 return Player.CLIMBER;
             }
@@ -116,9 +116,9 @@ public class Rules {
         Tile tile = board.tiles[coord.q, coord.r];
         if (board.currentStep == Step.MOVE && tile.occupiatBy == board.currentPlayer){
             // activate once ai knows how to teleport
-            //if(CanTeleport(board, tile)){
-            //    return true;
-            //}
+            // if(CanTeleport(board, tile)){
+            //     return true;
+            // }
             foreach (Coord neighborCoord in tile.GetNeighbors())
             {
                 if(neighborCoord.q >= board.tiles.GetLength(0) || neighborCoord.r >= board.tiles.GetLength(1)){
@@ -189,11 +189,9 @@ public class Rules {
         Coord topLeftCoord = new Coord(val, 0);
         Coord topRightCoord = new Coord(val * 2, 0);
 
-        // midle
         Coord rightCoord = new Coord(val * 2, val);
-        Coord leftCoord = new Coord(0, val * 2);
+        Coord leftCoord = new Coord(0, val);
 
-        //bottom
         Coord bottomRightCoord = new Coord(val, val * 2);
         Coord bottomLeftCoord = new Coord(0, val * 2);
 
@@ -212,7 +210,7 @@ public class Rules {
     public static bool canMoveTile(Board board, Coord coord)
     {
         Tile tile = board.tiles[coord.q,coord.r];
-        int homeRowR = board.currentPlayer == Player.DIGGER ? board.size - 1 : -1 * (board.size - 1);
+        int homeRowR = Rules.homeLine(board.currentPlayer,board.size);
         bool isHomeRow = tile.coord.r == homeRowR;
         return board.currentStep == Step.BUILD && tile.occupiatBy == null && !isHomeRow && tile.level != TileLevel.UNDERGROUND;
     }
@@ -237,10 +235,16 @@ public class Rules {
 
         bool minLevelFromTile = (from.level == TileLevel.HILL || from.level == TileLevel.GROUND);
 
-        int homeRowR = board.currentPlayer == Player.DIGGER ? 0 : 2 * (board.size - 1);
+        int homeRowR = Rules.homeLine(board.currentPlayer, board.size);
         bool toHomeRow = to.coord.r == homeRowR;
         bool fromHomeRow = from.coord.r == homeRowR;
         bool buildOnHill = to.level == TileLevel.HILL;
         return !sameTile && unoccupiat && minLevelFromTile && !buildOnHill && !toHomeRow && !fromHomeRow && canMoveAnyWhere;
+    }
+
+    public static int homeLine(Player player, int boardSize)
+    {
+        int multiply = player == Player.DIGGER ? 0 : 2;
+        return (boardSize - 1) * multiply;
     }
 }

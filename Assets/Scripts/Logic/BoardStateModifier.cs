@@ -8,7 +8,7 @@ public class BoardStateModifier
          int offSet = size - 1;
         int minR = 0;
         int maxR =  offSet * 2;
-        // +2 to avoid index out of bound on neighbors
+        //  +2 to avoid index out of bound on neighbors
         Tile[,] tiles = new Tile[offSet * 2+2 ,offSet *2+2];
 
         for (int r = minR; r <= maxR; r++ ){
@@ -33,6 +33,12 @@ public class BoardStateModifier
         setDigger(tiles,size);
         setClimber(tiles, size);
         return tiles;
+    }
+
+    public static Board NewBoard(int size)
+    {
+        Tile[,] tiles = ResetTiles(size);
+        return new Board(size, tiles);
     }
 
     public static  Tile[,] build(Tile[,] tiles, Tile from, Tile to)
@@ -109,19 +115,23 @@ public class BoardStateModifier
 
     private static void setClimber(Tile[,] tiles, int size)
     {
-        for (int q = size - 1; q < size + size - 1; q++)
+        int maxQ = (size - 1);
+        int minQ = 0;
+        int homeLine = Rules.homeLine(Player.CLIMBER, size);
+        for (int q = minQ; q <= maxQ; q++)
         {
-            setPlayerOnTile(tiles, Player.CLIMBER, new Coord(q, 0));
+            setPlayerOnTile(tiles, Player.CLIMBER, new Coord(q, homeLine));
         }
     }
 
     private static void setDigger(Tile[,] tiles, int size)
     {
-
-        int maxR = (size - 1) * 2;
-        for (int q = 0; q < size; q++)
+        int maxQ = (size - 1) * 2;
+        int minQ = (size - 1);
+        int homeLine = Rules.homeLine(Player.DIGGER,size);
+        for (int q = minQ; q <= maxQ; q++)
         {
-            setPlayerOnTile(tiles, Player.DIGGER, new Coord(q, maxR));
+            setPlayerOnTile(tiles, Player.DIGGER, new Coord(q, homeLine));
         }
     }
 

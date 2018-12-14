@@ -74,7 +74,7 @@ public class CameraOrbit : MonoBehaviour
 
     private void MoveCameraRig()
     {
-        //Actual Camera Rig Transformations
+        // Actual Camera Rig Transformations
         Quaternion QT = Quaternion.Euler(_LocalRotation.y, _LocalRotation.x, 0);
         this._XForm_Parent.rotation = Quaternion.Lerp(this._XForm_Parent.rotation, QT, Time.deltaTime * OrbitDampening);
 
@@ -86,7 +86,7 @@ public class CameraOrbit : MonoBehaviour
 
     private void ClampRotation()
     {
-        //Clamp the y Rotation to horizon and not flipping over at the top
+        // Clamp the y Rotation to horizon and not flipping over at the top
         if (_LocalRotation.y < minYRotation)
             _LocalRotation.y = minYRotation;
         else if (_LocalRotation.y > 90f)

@@ -64,7 +64,7 @@ public class AiCalculator
     private static int CloserToGoal(Board board, Tile fromTile, Tile toTile,int score)
     {
         Player opponent = Rules.GetOpponent(board.currentPlayer);
-        int goalR = homeLine(opponent, board.size); // 0 or 6
+        int goalR = Rules.homeLine(opponent, board.size); //0 or 6
         if (Math.Abs(goalR - toTile.coord.r) < Math.Abs(goalR - fromTile.coord.r))
         {
             score += 1;
@@ -80,7 +80,7 @@ public class AiCalculator
             if(tile == null){
                 continue;
             }
-            if (tile.coord.r != homeLine(board.currentPlayer,board.size) && tile.level != TileLevel.HILL && tile.occupiatBy == null)
+            if (tile.coord.r != Rules.homeLine(board.currentPlayer,board.size) && tile.level != TileLevel.HILL && tile.occupiatBy == null)
             {
                 result.Add(tile);
             }
@@ -103,10 +103,5 @@ public class AiCalculator
             toTile = allTo[random.Next(allTo.Length-1)];
         }
         return new Move(fromTile, toTile,1);
-    }
-
-    private static int homeLine(Player player, int boardSize){
-        int multiply = player == Player.DIGGER ? 0 : 2;
-        return (boardSize -1 ) * multiply;
     }
 }
