@@ -3,6 +3,7 @@
     PLAYING,
     PAUSED,
     AI_PLAYING,
-    UNKOWN
+    UNKOWN,
+    GAME_OVER
 }
 

@@ -5,6 +5,7 @@ public class MenuController : MonoBehaviour {
     public GameObject gameInfo;
     public GameObject mainMenu;
     public GameObject pauseMenu;
+    public GameObject gameOverMenu;
     public GameObject settingsMenu;
 
     private Game game;
@@ -17,56 +18,58 @@ public class MenuController : MonoBehaviour {
     }
 
 
+
+    public void OnGameOverMenu(){
+        allToFalse();
+        gameOverMenu.SetActive(true);
+    }
+
     public void OnMainMenu()
     {
         game.Restart();
-        gameInfo.SetActive(false);
-        mainMenu.SetActive(true);
-        pauseMenu.SetActive(false);
-        settingsMenu.SetActive(false);
         cameraOrbit.startOrbit();
+        allToFalse();
+        mainMenu.SetActive(true);
     }
 
     public void BackToMenu()
     {
-        gameInfo.SetActive(false);
+        allToFalse();
         mainMenu.SetActive(true);
-        pauseMenu.SetActive(false);
-        settingsMenu.SetActive(false);
     }
 
     public void OnSettingsMenu()
     {
-        gameInfo.SetActive(false);
-        mainMenu.SetActive(false);
-        pauseMenu.SetActive(false);
+        allToFalse();
         settingsMenu.SetActive(true);
     }
 
     public void OnPause()
     {
-        gameInfo.SetActive(false);
-        mainMenu.SetActive(false);
-        pauseMenu.SetActive(true);
-        settingsMenu.SetActive(false);
         game.OnPause();
+        allToFalse();
+        pauseMenu.SetActive(true);
     }
 
     public void OnNewGame()
     {
-        gameInfo.SetActive(true);
-        mainMenu.SetActive(false);
-        pauseMenu.SetActive(false);
-        settingsMenu.SetActive(false);
         game.OnNewGame();
+        allToFalse();
+        gameInfo.SetActive(true);
     }
 
     public void OnPlay()
     {
+        game.OnPlay();
+        allToFalse();
         gameInfo.SetActive(true);
+    }
+
+    private void allToFalse(){
+        gameInfo.SetActive(false);
         mainMenu.SetActive(false);
         pauseMenu.SetActive(false);
         settingsMenu.SetActive(false);
-        game.OnPlay();
+        gameOverMenu.SetActive(false);
     }
 }

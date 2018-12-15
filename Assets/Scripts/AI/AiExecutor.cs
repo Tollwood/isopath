@@ -25,11 +25,13 @@ public class AiExecutor : MonoBehaviour {
     {
         if (GameState.UNKOWN == knownGameState || knownGameState != game.gameState){
             knownGameState = game.gameState;
-            UpdateUIPlayer(knownGameState);
+            UpdateUIPlayer();
             thinking = false;
-
         }
 
+        if(knownGameState == GameState.GAME_OVER){
+            return;
+        }
         if (game.board != null)
         {
             if (aiClimber != null && game.board.currentPlayer == Player.CLIMBER && !thinking)
@@ -46,7 +48,7 @@ public class AiExecutor : MonoBehaviour {
         }
 
     // TODO replace with events
-    private void UpdateUIPlayer(GameState knownGameState)
+    private void UpdateUIPlayer()
     {
 
         switch(knownGameState){
@@ -56,11 +58,11 @@ public class AiExecutor : MonoBehaviour {
                 break;
             case GameState.PLAYING:
                 // wait for last ai move to finish
-                if (!game.gameConfig.aiClimber)
+                if (!game.board.settings.aiClimber)
                 {
                     aiClimber = null;
                 }
-                if (!game.gameConfig.aiDigger)
+                if (!game.board.settings.aiDigger)
                 {
                     aiDigger = null;
                 }

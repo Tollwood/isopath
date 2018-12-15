@@ -32,10 +32,10 @@ public class BoardFactory : MonoBehaviour
     {
         game = FindObjectOfType<Game>();
     }
-    internal Board create(GameConfig gameConfig)
+    internal Board create(Settings settings)
     {
         
-        board = new Board(gameConfig.size, BoardStateModifier.ResetTiles(gameConfig.size));
+        board = new Board(settings, BoardStateModifier.ResetTiles(settings.size));
 
         foreach (Tile tile in board.tiles)
         {
@@ -137,7 +137,8 @@ public class BoardFactory : MonoBehaviour
                 stoneOffset = 0.13f;
                 break;
         }
-        return new Vector3( xqOffSet * ((coord.q - (board.size -1) ) +  (coord.r - (board.size - 1)) )- (coord.r - (board.size - 1)), stoneOffset, zrOffset * (coord.r -(board.size-1)) );
+        float x = xqOffSet * ((coord.q - (board.size - 1)) + (coord.r - (board.size - 1))) - (coord.r - (board.size - 1));
+        return new Vector3( x , stoneOffset, zrOffset * (coord.r -(board.size-1)) );
     }
 
     public Vector3 GetPositionForHexagon(Coord coord, TileLevel tileLevel)
@@ -145,12 +146,12 @@ public class BoardFactory : MonoBehaviour
         return new Vector3( xqOffSet  * ((coord.q - (board.size - 1)) + (coord.r - (board.size - 1))) - (coord.r - (board.size - 1)), GetTileLevelOffset(tileLevel), zrOffset * (coord.r - (board.size-1) ) );
     }
 
-    public Board Restart(GameConfig gameConfig){
+    public Board Restart(Settings settings){
         foreach (Transform child in uiContainer)
         {
             Destroy(child.gameObject);
         }
-        return create(gameConfig);
+        return create(settings);
     }
 
     public Draggable findByTile(Tile tile){

@@ -4,26 +4,29 @@
 [RequireComponent(typeof(BoardFactory))]
 public class Game : MonoBehaviour {
     
-    public GameConfig gameConfig = new GameConfig();
-
     public Board board { get; private set; }
-
+    public Settings settings { get; private set; }
     private BoardFactory boardFactory;
 
     private CameraOrbit cameraOrbit;
     public GameState gameState { get; private set; }
     private Selector selector;
-
+    private SettingsController settingsController;
+    private MenuController menuController;
 
     void Awake () {
         selector = GetComponent<Selector>();
         boardFactory = GetComponent<BoardFactory>();
+        settings = new Settings(4, false, false);
+        string defaultSettings = JsonUtility.ToJson(settings);
+        settings = (Settings)JsonUtility.FromJson(PlayerPrefs.GetString("Settings", defaultSettings), settings.GetType());
 	}
 
     private void Start()
     {
         cameraOrbit = FindObjectOfType<CameraOrbit>();
-        board = boardFactory.create(gameConfig);
+        menuController = FindObjectOfType<MenuController>();
+        board = boardFactory.create(settings);
         gameState = GameState.AI_PLAYING;
     }
 
@@ -50,12 +53,22 @@ public class Game : MonoBehaviour {
     internal void MoveStone(Tile fromTile, Tile toTile)
     {
         board = BoardStateModifier.moveStone(board, fromTile, toTile);
+        GameOverCheck();
+    }
+
+    private void GameOverCheck()
+    {
+        if (Rules.CheckWinningCondition(board) != null)
+        {
+            gameState = GameState.GAME_OVER;
+            menuController.OnGameOverMenu();
+        }
     }
 
     // Buttons
     public void Restart()
     {
-        board = boardFactory.Restart(gameConfig);
+        board = boardFactory.Restart(settings);
         gameState = GameState.AI_PLAYING;
     }
 
@@ -73,7 +86,7 @@ public class Game : MonoBehaviour {
     public void OnNewGame()
     {
         cameraOrbit.Reset();
-        board = boardFactory.Restart(gameConfig);
+        board = boardFactory.Restart(settings);
         gameState = GameState.PLAYING;
     }
 }

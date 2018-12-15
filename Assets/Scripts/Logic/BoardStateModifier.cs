@@ -37,8 +37,9 @@ public class BoardStateModifier
 
     public static Board NewBoard(int size)
     {
+        Settings settings = new Settings(size, false, false);
         Tile[,] tiles = ResetTiles(size);
-        return new Board(size, tiles);
+        return new Board(settings, tiles);
     }
 
     public static  Tile[,] build(Tile[,] tiles, Tile from, Tile to)
