@@ -33,7 +33,7 @@ public class Game : MonoBehaviour {
    
     public void build(Tile from, Tile to){
         Tile[,] tiles = BoardStateModifier.build( board.tiles, from, to);
-        board = new Board(board.size, tiles, Step.MOVE, board.currentPlayer);
+        board = new Board(board.size, tiles, Step.MOVE, board.currentPlayer,board.settings);
     }
 
     private void build(Move move)

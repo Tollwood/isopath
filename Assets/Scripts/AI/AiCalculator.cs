@@ -20,7 +20,7 @@ public class AiCalculator
     {
         Move buildMove = bestBuild(board, seed);
         Tile[,] tilesAfterBuild = BoardStateModifier.build(board.tiles, buildMove.from, buildMove.to);
-        Board boardAfterBuild = new Board(board.size, tilesAfterBuild, Step.MOVE, board.currentPlayer);
+        Board boardAfterBuild = new Board(board.size, tilesAfterBuild, Step.MOVE, board.currentPlayer,board.settings);
         Move stoneMove = moveStone(boardAfterBuild, seed);
         return new Moves(buildMove, stoneMove,board.currentPlayer);
     }
@@ -40,18 +40,13 @@ public class AiCalculator
         {
             if (fromTile != null && fromTile.occupiatBy == board.currentPlayer)
             {
-                foreach (Coord coord in fromTile.GetNeighbors())
+                foreach (Tile tile in Rules.GetNeighbors(board, fromTile ))
                 {
-                    if (coord.q >= board.tiles.GetLength(0) || coord.r >= board.tiles.GetLength(1))
-                    {
-                        continue;
-                    }
-                    Tile toTile = board.tiles[coord.q, coord.r];
-                    if (toTile != null && Rules.canMoveStone(board, fromTile, toTile))
+                    if (Rules.canMoveStone(board, fromTile, tile))
                     {
                         int score = 1;
-                        score = CloserToGoal(board, fromTile,toTile,score);
-                        validMoves.Add(new Move(fromTile, toTile, score));
+                        score = CloserToGoal(board, fromTile,tile,score);
+                        validMoves.Add(new Move(fromTile, tile, score));
                     }
                 }
             }
@@ -89,6 +84,11 @@ public class AiCalculator
 
     public static Move bestBuild(Board board, int seed){
         Tile[] allFrom = allPossibleHexToBuildFrom(board);
+        foreach(Tile tile in allFrom){
+            if (tile == null) continue;
+        }
+
+
         Tile[] allTo = allPossibleHexToBuildTo(board);
 
         Random random = new Random(seed);

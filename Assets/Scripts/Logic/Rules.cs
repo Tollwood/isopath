@@ -17,6 +17,26 @@ public class Rules {
         return false;
     }
 
+    public static Player? CheckWinningCondition(Board board)
+    {
+        int diggerHomeLine = Rules.homeLine(Player.DIGGER, board.size);
+        int climberHomeLine = Rules.homeLine(Player.CLIMBER, board.size);
+        foreach (Tile tile in board.tiles)
+        {
+            if (tile == null) continue;
+
+            if (tile.coord.r == climberHomeLine && tile.occupiatBy == Player.DIGGER)
+            {
+                return Player.DIGGER;
+            }
+            if (tile.coord.r == diggerHomeLine && tile.occupiatBy == Player.CLIMBER)
+            {
+                return Player.CLIMBER;
+            }
+        }
+        return null;
+    }
+
     public static Player GetOpponent(Player player)
     {
         return player == Player.DIGGER ? Player.CLIMBER : Player.DIGGER;
@@ -25,12 +45,8 @@ public class Rules {
     private static int CountEnemyNeighbors( Board board, Tile tile, Player enemy)
     {
         int count = 0;
-        foreach(Coord neighborCoord in tile.GetNeighbors()){
-            if (neighborCoord.q >= board.tiles.GetLength(0) || neighborCoord.r >= board.tiles.GetLength(1))
-            {
-                continue;
-            }
-            Tile neighborTile = board.tiles[neighborCoord.q,neighborCoord.r];
+        foreach(Tile neighborTile in Rules.GetNeighbors(board,tile)){
+            
             if( neighborTile != null && neighborTile.occupiatBy == enemy){
                 count++;
             }
@@ -54,13 +70,46 @@ public class Rules {
         return count;
     }
 
+    internal static List<Tile> GetNeighbors(Board board, Tile fromTile)
+    {
+        Coord coord = fromTile.coord;
+        List<Tile> neighbors = new List<Tile>();
+
+        Coord newCoordTL = new Coord(coord.q + 1, coord.r + 0);
+        Coord newCoordTR = new Coord(coord.q + 0, coord.r + 1);
+        Coord newCoordR = new Coord(coord.q - 1, coord.r + 0);
+        Coord newCoordL = new Coord(coord.q - 1, coord.r + 1);
+        Coord newCoordBL = new Coord(coord.q + 1, coord.r - 1);
+        Coord newCoordBR = new Coord(coord.q + 0, coord.r - 1);
+
+        if (IsValidNeighbor(board.size, newCoordTL)) neighbors.Add(board.tiles[newCoordTL.q, newCoordTL.r]);
+        if (IsValidNeighbor(board.size, newCoordTR)) neighbors.Add(board.tiles[newCoordTR.q, newCoordTR.r]);
+        if (IsValidNeighbor(board.size, newCoordR)) neighbors.Add(board.tiles[newCoordR.q, newCoordR.r]);
+        if (IsValidNeighbor(board.size, newCoordL)) neighbors.Add(board.tiles[newCoordL.q, newCoordL.r]);
+        if (IsValidNeighbor(board.size, newCoordBL)) neighbors.Add(board.tiles[newCoordBL.q, newCoordBL.r]);
+        if (IsValidNeighbor(board.size, newCoordBR)) neighbors.Add(board.tiles[newCoordBR.q, newCoordTL.r]);
+
+        return neighbors;
+    }
+
+    private static bool IsValidNeighbor(int size, Coord coord)
+    {
+        int val = size - 1;
+        int sum = coord.q + coord.r;
+        // sum must be at least boardSize -1;
+        // sum must not be bigger than  (boardsize -1) * 3
+        // neither q nor r must be less than 0;
+        // q must not be bigger than (boardsize -1) * 2
+        return sum >= val && sum <= val * 3 && coord.q >= 0 && coord.r >= 0 && coord.q <= val * 2;
+    }
+
     internal static bool canMoveStoneAnyWhere(Board board, Coord fromCoord, Coord toCoord)
     {
         Tile fromTile = board.tiles[fromCoord.q, fromCoord.r];
         Tile toTile = board.tiles[toCoord.q,toCoord.r];
         // should not modify state
         Rules.canBuild(board, fromTile, toTile);
-        bool result = canMoveStoneAnyWhere(board.tiles, board.currentPlayer);
+        bool result = canMoveStoneAnyWhere(board, board.currentPlayer);
         // should not modify state
         Rules.canBuild(board, toTile, fromTile);
         return result;
@@ -72,35 +121,16 @@ public class Rules {
         return CountEnemyNeighbors(board, board.tiles[coord.q,coord.r], board.currentPlayer) >= THREAT_THRESHHOLD;
     }
 
-    public static Player? CheckWinningCondition(Board board)
-    {
-        int diggerHomeLine = Rules.homeLine(Player.DIGGER, board.size);
-        int climberHomeLine =  Rules.homeLine(Player.CLIMBER,board.size);
-        foreach (Tile tile in board.tiles)
-        {
-            if(tile == null) continue;
-            
-            if (tile.coord.r == climberHomeLine && tile.occupiatBy == Player.DIGGER)
-            {
-                return Player.DIGGER;
-            }
-            if (tile.coord.r == diggerHomeLine && tile.occupiatBy == Player.CLIMBER)
-            {
-                return Player.CLIMBER;
-            }
-        }
-        return null;
-    }
+   
 
-    public static  bool canMoveStoneAnyWhere(Tile[,] tiles, Player player){
+    public static  bool canMoveStoneAnyWhere(Board board, Player player){
         TileLevel expectedTileLevel = player == Player.CLIMBER ? TileLevel.HILL : TileLevel.UNDERGROUND;
-        foreach(Tile tile in tiles){
+        foreach(Tile tile in board.tiles){
             if(tile == null){
                 continue;
             }
             if(tile.occupiatBy == player){
-                foreach(Coord coord in tile.GetNeighbors()){
-                    Tile potentialTile = tiles[coord.q,coord.r];
+                foreach(Tile potentialTile in Rules.GetNeighbors(board, tile)){
                     if (potentialTile != null && potentialTile.occupiatBy == null && potentialTile.level == expectedTileLevel)
                     {
                         return true;
@@ -116,22 +146,13 @@ public class Rules {
         Tile tile = board.tiles[coord.q, coord.r];
         if (board.currentStep == Step.MOVE && tile.occupiatBy == board.currentPlayer){
             // activate once ai knows how to teleport
-            // if(CanTeleport(board, tile)){
-            //     return true;
-            // }
-            foreach (Coord neighborCoord in tile.GetNeighbors())
+            if(CanTeleport(board, tile)){
+                 return true;
+            }
+            foreach (Tile neighbor in Rules.GetNeighbors(board,tile))
             {
-                if(neighborCoord.q >= board.tiles.GetLength(0) || neighborCoord.r >= board.tiles.GetLength(1)){
-                    continue;
-                }
-                Tile neighbor = board.tiles[neighborCoord.q,neighborCoord.r];
-
                 bool moveOneStep = neighbor != null && neighbor.occupiatBy == null && neighbor.level == GetRequiredTileLevel(board.currentPlayer);
-
-                if (moveOneStep)
-                {
-                    return true;
-                }
+                if (moveOneStep) return true;
             }  
         }
         return false;
@@ -177,7 +198,9 @@ public class Rules {
     {
         bool currentPlayerMoving = fromTile.occupiatBy == board.currentPlayer;
         TileLevel toLevel = GetRequiredTileLevel(board.currentPlayer);
-        if (currentPlayerMoving && toTile.occupiatBy == null && toTile.level == toLevel && (fromTile.isNeighbour(toTile) || teleport(board.size, fromTile,toTile))){
+        bool isNeighbor = Rules.GetNeighbors(board, fromTile).Contains(toTile);
+        bool canTeleport = CanTeleport(board, fromTile);
+        if (currentPlayerMoving && toTile.occupiatBy == null && toTile.level == toLevel && (isNeighbor || canTeleport)){
             return true;
         }
         return false;
@@ -212,7 +235,7 @@ public class Rules {
         Tile tile = board.tiles[coord.q,coord.r];
         int homeRowR = Rules.homeLine(board.currentPlayer,board.size);
         bool isHomeRow = tile.coord.r == homeRowR;
-        return board.currentStep == Step.BUILD && tile.occupiatBy == null && !isHomeRow && tile.level != TileLevel.UNDERGROUND;
+        return board.currentStep == Step.BUILD && tile.occupiatBy == null && !isHomeRow && tile.level != TileLevel.UNDERGROUND; 
     }
 
 
@@ -227,7 +250,8 @@ public class Rules {
     {
 
         Tile[,] modifiedTiles = BoardStateModifier.build(board.tiles, from, to);
-        bool canMoveAnyWhere = Rules.canMoveStoneAnyWhere(modifiedTiles, board.currentPlayer);
+        Board modifiedBoard = new Board(board.size, modifiedTiles, board.currentStep, board.currentPlayer, board.settings);
+        bool canMoveAnyWhere = Rules.canMoveStoneAnyWhere(modifiedBoard, board.currentPlayer);
         bool sameTile = from.coord.Equals(to.coord);
         // TODO placing tile is only valid iv player move afterwards
 

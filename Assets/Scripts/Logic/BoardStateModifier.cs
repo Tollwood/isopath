@@ -94,7 +94,7 @@ public class BoardStateModifier
             nextStep = Step.BUILD;
             nextPlayer = board.currentPlayer == Player.DIGGER ? Player.CLIMBER : Player.DIGGER;
         }
-        return new Board(board.size,copyOfTiles,nextStep,nextPlayer);
+        return new Board(board.size,copyOfTiles,nextStep,nextPlayer,board.settings);
     }
 
     public static Board moveStone(Board board, Tile from, Tile to)
@@ -111,7 +111,7 @@ public class BoardStateModifier
 
         Player nextPlayer = board.currentPlayer == Player.DIGGER ? Player.CLIMBER : Player.DIGGER;
         
-        return new Board(board.size,copyOfTiles,Step.BUILD,nextPlayer);
+        return new Board(board.size,copyOfTiles,Step.BUILD,nextPlayer,board.settings);
     }
 
     private static void setClimber(Tile[,] tiles, int size)

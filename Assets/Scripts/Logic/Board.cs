@@ -18,11 +18,12 @@ public class Board
 
     }
 
-    public Board(int size, Tile[,] tiles, Step currentStep, Player currentPlayer)
+    public Board(int size, Tile[,] tiles, Step currentStep, Player currentPlayer, Settings settings)
     {
         this.size = size;
         this.tiles = tiles;
         this.currentStep= currentStep;
         this.currentPlayer = currentPlayer;
+        this.settings = settings;
     }
 }
