@@ -70,7 +70,7 @@ public class Rules {
         return count;
     }
 
-    internal static List<Tile> GetNeighbors(Board board, Tile fromTile)
+    public static List<Tile> GetNeighbors(Board board, Tile fromTile)
     {
         Coord coord = fromTile.coord;
         List<Tile> neighbors = new List<Tile>();
@@ -87,7 +87,7 @@ public class Rules {
         if (IsValidNeighbor(board.size, newCoordR)) neighbors.Add(board.tiles[newCoordR.q, newCoordR.r]);
         if (IsValidNeighbor(board.size, newCoordL)) neighbors.Add(board.tiles[newCoordL.q, newCoordL.r]);
         if (IsValidNeighbor(board.size, newCoordBL)) neighbors.Add(board.tiles[newCoordBL.q, newCoordBL.r]);
-        if (IsValidNeighbor(board.size, newCoordBR)) neighbors.Add(board.tiles[newCoordBR.q, newCoordTL.r]);
+        if (IsValidNeighbor(board.size, newCoordBR)) neighbors.Add(board.tiles[newCoordBR.q, newCoordBR.r]);
 
         return neighbors;
     }
@@ -100,7 +100,7 @@ public class Rules {
         // sum must not be bigger than  (boardsize -1) * 3
         // neither q nor r must be less than 0;
         // q must not be bigger than (boardsize -1) * 2
-        return sum >= val && sum <= val * 3 && coord.q >= 0 && coord.r >= 0 && coord.q <= val * 2;
+        return sum >= val && sum <= val * 3 && coord.q >= 0 && coord.r >= 0 && coord.q <= val * 2 && coord.r <= val * 2;
     }
 
     internal static bool canMoveStoneAnyWhere(Board board, Coord fromCoord, Coord toCoord)
