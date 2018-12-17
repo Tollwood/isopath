@@ -4,13 +4,13 @@ using System.Linq;
 
 [System.Serializable]
 public class Rules {
-    private static int THREAT_THRESHHOLD = 2;
+    private static int THREAT_THRESHHOLD = 1;
 
     public static bool IsThreaten(Board board, Player player)
     {
         Player opponent = GetOpponent(board.currentPlayer);
         foreach(Tile tile in board.tiles){
-            if(tile.occupiatBy == player && CountEnemyNeighbors(board,tile, opponent ) >= THREAT_THRESHHOLD){
+            if(tile.occupiatBy == player && CountNeighborsOccupiatBy(board.tiles, board.size,tile, opponent ) >= THREAT_THRESHHOLD){
                 return true;
             }
         }
@@ -21,10 +21,19 @@ public class Rules {
     {
         int diggerHomeLine = Rules.homeLine(Player.DIGGER, board.size);
         int climberHomeLine = Rules.homeLine(Player.CLIMBER, board.size);
+        int climberStoneCount = 0;
+        int diggerStoneCount = 0;
         foreach (Tile tile in board.tiles)
         {
             if (tile == null) continue;
-
+            if (tile.occupiatBy == Player.DIGGER)
+            {
+                diggerStoneCount++;
+            }
+            if (tile.occupiatBy == Player.CLIMBER)
+            {
+                climberStoneCount++;
+            }
             if (tile.coord.r == climberHomeLine && tile.occupiatBy == Player.DIGGER)
             {
                 return Player.DIGGER;
@@ -34,6 +43,8 @@ public class Rules {
                 return Player.CLIMBER;
             }
         }
+        if(diggerStoneCount == 0) return Player.CLIMBER;
+        if (climberStoneCount == 0) return Player.DIGGER;
         return null;
     }
 
@@ -42,35 +53,36 @@ public class Rules {
         return player == Player.DIGGER ? Player.CLIMBER : Player.DIGGER;
     }
 
-    private static int CountEnemyNeighbors( Board board, Tile tile, Player enemy)
+    private static int CountNeighborsOccupiatBy( Tile[,] tiles, int size, Tile tile, Player occupiant)
     {
         int count = 0;
-        foreach(Tile neighborTile in Rules.GetNeighbors(board,tile)){
+        foreach(Tile neighborTile in Rules.GetNeighbors(tiles, size,tile)){
             
-            if( neighborTile != null && neighborTile.occupiatBy == enemy){
+            if( neighborTile != null && neighborTile.occupiatBy == occupiant){
                 count++;
             }
         }
-        int teleportQ = board.size - 1;
-        if(tile.coord.Equals(new Coord(teleportQ , 0))){
-            Tile neighborTile = board.tiles[-1 * teleportQ, 0];
-            if (neighborTile != null && neighborTile.occupiatBy == enemy)
-            {
-                count++;
-            }
-        }
-        if (tile.coord.Equals(new Coord( -1 * teleportQ, 0)))
-        {
-            Tile neighborTile = board.tiles[teleportQ, 0];
-            if (neighborTile != null && neighborTile.occupiatBy == enemy)
-            {
-                count++;
-            }
-        }
+        // TODO consider Teleport
+        //int teleportQ = board.size - 1;
+        //if(tile.coord.Equals(new Coord(teleportQ , 0))){
+        //    Tile neighborTile = board.tiles[-1 * teleportQ, 0];
+        //    if (neighborTile != null && neighborTile.occupiatBy == enemy)
+        //    {
+        //        count++;
+        //    }
+        //}
+        //if (tile.coord.Equals(new Coord( -1 * teleportQ, 0)))
+        //{
+        //    Tile neighborTile = board.tiles[teleportQ, 0];
+        //    if (neighborTile != null && neighborTile.occupiatBy == enemy)
+        //    {
+        //        count++;
+        //    }
+        //}
         return count;
     }
 
-    public static List<Tile> GetNeighbors(Board board, Tile fromTile)
+    public static List<Tile> GetNeighbors(Tile[,] tiles, int size, Tile fromTile)
     {
         Coord coord = fromTile.coord;
         List<Tile> neighbors = new List<Tile>();
@@ -82,12 +94,12 @@ public class Rules {
         Coord newCoordBL = new Coord(coord.q + 1, coord.r - 1);
         Coord newCoordBR = new Coord(coord.q + 0, coord.r - 1);
 
-        if (IsValidNeighbor(board.size, newCoordTL)) neighbors.Add(board.tiles[newCoordTL.q, newCoordTL.r]);
-        if (IsValidNeighbor(board.size, newCoordTR)) neighbors.Add(board.tiles[newCoordTR.q, newCoordTR.r]);
-        if (IsValidNeighbor(board.size, newCoordR)) neighbors.Add(board.tiles[newCoordR.q, newCoordR.r]);
-        if (IsValidNeighbor(board.size, newCoordL)) neighbors.Add(board.tiles[newCoordL.q, newCoordL.r]);
-        if (IsValidNeighbor(board.size, newCoordBL)) neighbors.Add(board.tiles[newCoordBL.q, newCoordBL.r]);
-        if (IsValidNeighbor(board.size, newCoordBR)) neighbors.Add(board.tiles[newCoordBR.q, newCoordBR.r]);
+        if (IsValidNeighbor(size, newCoordTL)) neighbors.Add(tiles[newCoordTL.q, newCoordTL.r]);
+        if (IsValidNeighbor(size, newCoordTR)) neighbors.Add(tiles[newCoordTR.q, newCoordTR.r]);
+        if (IsValidNeighbor(size, newCoordR)) neighbors.Add(tiles[newCoordR.q, newCoordR.r]);
+        if (IsValidNeighbor(size, newCoordL)) neighbors.Add(tiles[newCoordL.q, newCoordL.r]);
+        if (IsValidNeighbor(size, newCoordBL)) neighbors.Add(tiles[newCoordBL.q, newCoordBL.r]);
+        if (IsValidNeighbor(size, newCoordBR)) neighbors.Add(tiles[newCoordBR.q, newCoordBR.r]);
 
         return neighbors;
     }
@@ -108,17 +120,17 @@ public class Rules {
         Tile fromTile = board.tiles[fromCoord.q, fromCoord.r];
         Tile toTile = board.tiles[toCoord.q,toCoord.r];
         // should not modify state
-        Rules.canBuild(board, fromTile, toTile);
+        Rules.CanBuild(board, fromTile, toTile);
         bool result = canMoveStoneAnyWhere(board, board.currentPlayer);
         // should not modify state
-        Rules.canBuild(board, toTile, fromTile);
+        Rules.CanBuild(board, toTile, fromTile);
         return result;
 
     }
 
-    public static bool CanCapture(Board board, Coord coord)
+    public static bool CanCapture(Tile[,] tiles, int size, Player player,  Tile captureFrom)
     {
-        return CountEnemyNeighbors(board, board.tiles[coord.q,coord.r], board.currentPlayer) >= THREAT_THRESHHOLD;
+        return CountNeighborsOccupiatBy(tiles, size, captureFrom, player) > THREAT_THRESHHOLD;
     }
 
    
@@ -130,7 +142,7 @@ public class Rules {
                 continue;
             }
             if(tile.occupiatBy == player){
-                foreach(Tile potentialTile in Rules.GetNeighbors(board, tile)){
+                foreach(Tile potentialTile in Rules.GetNeighbors(board.tiles, board.size, tile)){
                     if (potentialTile != null && potentialTile.occupiatBy == null && potentialTile.level == expectedTileLevel)
                     {
                         return true;
@@ -141,26 +153,26 @@ public class Rules {
         return false;
     }
 
-    public static bool canMoveStone(Board board, Coord coord)
+    public static bool canMoveStone(Tile[,] tiles, Player currentPlayer, Step currentStep, int size, Coord coord)
     {
-        Tile tile = board.tiles[coord.q, coord.r];
-        if (board.currentStep == Step.MOVE && tile.occupiatBy == board.currentPlayer){
+        Tile tile = tiles[coord.q, coord.r];
+        if (currentStep == Step.MOVE && tile.occupiatBy == currentPlayer){
             // activate once ai knows how to teleport
-            if(CanTeleport(board, tile)){
+            if(CanTeleport(tiles, currentPlayer,size, tile)){
                  return true;
             }
-            foreach (Tile neighbor in Rules.GetNeighbors(board,tile))
+            foreach (Tile neighbor in Rules.GetNeighbors(tiles, size, tile))
             {
-                bool moveOneStep = neighbor != null && neighbor.occupiatBy == null && neighbor.level == GetRequiredTileLevel(board.currentPlayer);
+                bool moveOneStep = neighbor != null && neighbor.occupiatBy == null && neighbor.level == GetRequiredTileLevel(currentPlayer);
                 if (moveOneStep) return true;
             }  
         }
         return false;
     }
 
-    private static bool CanTeleport(Board board, Tile tile)
+    private static bool CanTeleport(Tile[,] tiles, Player currentPlayer, int size, Tile tile)
     {
-        int val = board.size - 1;
+        int val = size - 1;
         List<Coord> teleports = new List<Coord>();
         teleports.Add(new Coord(val, 0));
         teleports.Add(new Coord(val *2, 0));
@@ -181,8 +193,8 @@ public class Rules {
             .Where((Coord coord) => coord.q != tile.coord.q)
             .Single();
 
-        Tile teleportTile = board.tiles[teleportCoord.q,teleportCoord.r];
-        TileLevel requiredLevel = GetRequiredTileLevel(board.currentPlayer);
+        Tile teleportTile = tiles[teleportCoord.q,teleportCoord.r];
+        TileLevel requiredLevel = GetRequiredTileLevel(currentPlayer);
         if(teleportTile != null && teleportTile.occupiatBy == null && teleportTile.level == requiredLevel ){
             return true;
         }
@@ -194,12 +206,12 @@ public class Rules {
         return player == Player.DIGGER ? TileLevel.UNDERGROUND : TileLevel.HILL;
     }
 
-    public static  bool canMoveStone(Board board, Tile fromTile, Tile toTile)
+    public static  bool canMoveStone(Tile[,] tiles,Player currentPlayer, int size, Tile fromTile, Tile toTile)
     {
-        bool currentPlayerMoving = fromTile.occupiatBy == board.currentPlayer;
-        TileLevel toLevel = GetRequiredTileLevel(board.currentPlayer);
-        bool isNeighbor = Rules.GetNeighbors(board, fromTile).Contains(toTile);
-        bool canTeleport = CanTeleport(board, fromTile);
+        bool currentPlayerMoving = fromTile.occupiatBy == currentPlayer;
+        TileLevel toLevel = GetRequiredTileLevel(currentPlayer);
+        bool isNeighbor = Rules.GetNeighbors(tiles, size, fromTile).Contains(toTile);
+        bool canTeleport = CanTeleport(tiles,currentPlayer,size, fromTile);
         if (currentPlayerMoving && toTile.occupiatBy == null && toTile.level == toLevel && (isNeighbor || canTeleport)){
             return true;
         }
@@ -246,7 +258,7 @@ public class Rules {
         return tile;
     }
 
-    public static bool canBuild(Board board, Tile from, Tile to)
+    public static bool CanBuild(Board board, Tile from, Tile to)
     {
 
         Tile[,] modifiedTiles = BoardStateModifier.build(board.tiles, from, to);

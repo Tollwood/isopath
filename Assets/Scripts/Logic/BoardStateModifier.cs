@@ -72,19 +72,18 @@ public class BoardStateModifier
         return copyOfTiles;
     }
 
-    public static Board Capture(Board board, Coord coord)
+    public static Board Capture(Board board, Tile tile)
     {
 
-        if(!Rules.CanCapture(board,coord)){
+        if(!Rules.CanCapture(board.tiles, board.size, board.currentPlayer, tile)){
             throw new Exception("Trying to caputre but its not allowed");
         }
         Tile[,] copyOfTiles = new Tile[board.tiles.GetLength(0), board.tiles.GetLength(1)];
         Array.Copy(board.tiles, copyOfTiles, board.tiles.Length);
 
 
-        Tile tile = board.tiles[coord.q,coord.r];
         Tile newTile = new Tile(tile.coord, tile.level, null);
-        copyOfTiles[coord.q,coord.r] = newTile;
+        copyOfTiles[tile.coord.q,tile.coord.r] = newTile;
 
         Step nextStep = Step.MOVE;
         Player nextPlayer = board.currentPlayer;
@@ -99,7 +98,7 @@ public class BoardStateModifier
 
     public static Board moveStone(Board board, Tile from, Tile to)
     {
-        if (!Rules.canMoveStone(board, from, to))
+        if (!Rules.canMoveStone(board.tiles,board.currentPlayer,board.size, from, to))
         {
             throw new Exception("Trying to move stone but its not allowed");
         }

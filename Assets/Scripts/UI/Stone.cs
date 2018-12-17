@@ -22,7 +22,7 @@ public class Stone : MonoBehaviour, Draggable{
 
     internal void OnMouseEnter()
     {
-        if(Rules.canMoveStone(game.board,coord)){
+        if(Rules.canMoveStone(game.board.tiles, game.board.currentPlayer, game.board.currentStep, game.board.size,coord)){
             meshRenderer.material = hoverMaterial;
         }
     }
@@ -39,7 +39,7 @@ public class Stone : MonoBehaviour, Draggable{
 
     public bool isDraggable()
     {
-        return Rules.canMoveStone(game.board,coord);
+        return Rules.canMoveStone(game.board.tiles, game.board.currentPlayer, game.board.currentStep, game.board.size, coord);
     }
 
     public Tile getTile(){

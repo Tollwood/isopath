@@ -75,28 +75,48 @@ public class AiExecutor : MonoBehaviour {
     IEnumerator AiMove(AiAgent agent){
         yield return new WaitForSeconds(2f);
         if(thinking){
-            Moves nextMove = agent.GetNextMove(game.board);
-            build(nextMove.buildMove);
-            yield return new WaitForSeconds(2f);
+            ScoredMove nextMove = agent.GetNextMove(game.board);
+            if(nextMove.captureStone != null && nextMove.buildFrom == null)
+            {
+                CaptureStone(nextMove);
+                yield return new WaitForSeconds(2f);
+            }
+            else
+            {
+                build(nextMove);
+                yield return new WaitForSeconds(2f);
+            }
+
             if (thinking)
             {
-                MoveStone(nextMove.stoneMove);
+                if (nextMove.captureStone != null && nextMove.moveTo == null)
+                {
+                    CaptureStone(nextMove);
+                }
+                else {
+                    MoveStone(nextMove);
+                }
             }
         }
         thinking = false;
     }
 
-    private void build(Move move)
+    private void CaptureStone(ScoredMove nextMove)
     {
-        Debug.Log(move);
-        boardFactory.placeHexagon(move.from, move.to);
+        boardFactory.CaptureStone(nextMove.captureStone);
     }
 
-    private void MoveStone(Move move)
+    private void build(ScoredMove move)
     {
         Debug.Log(move);
-        Stone stone = (Stone)boardFactory.findStoneByTile(move.from);
-        Hexagon toHex = (Hexagon)boardFactory.findByTile(move.to);
+        boardFactory.placeHexagon(move.buildFrom, move.buildTo);
+    }
+
+    private void MoveStone(ScoredMove move)
+    {
+        Debug.Log(move);
+        Stone stone = boardFactory.findStoneByTile(move.moveFrom);
+        Hexagon toHex = (Hexagon)boardFactory.findByTile(move.moveTo);
         boardFactory.placeStone(stone, toHex);
     }
 

@@ -18,8 +18,6 @@ public class BoardFactory : MonoBehaviour
 
     public Transform uiContainer;
 
-    Board board;
-
     private Game game;
 
     private void Awake()
@@ -35,7 +33,7 @@ public class BoardFactory : MonoBehaviour
     internal Board create(Settings settings)
     {
         
-        board = new Board(settings, BoardStateModifier.ResetTiles(settings.size));
+        Board board = new Board(settings, BoardStateModifier.ResetTiles(settings.size));
 
         foreach (Tile tile in board.tiles)
         {
@@ -44,25 +42,32 @@ public class BoardFactory : MonoBehaviour
             }
             if (tile.level == TileLevel.UNDERGROUND)
             {
-                addHexagon(tile.coord, GetPositionForHexagon(tile.coord,TileLevel.UNDERGROUND),TileLevel.UNDERGROUND);
-                addStone(tile.coord,TileLevel.UNDERGROUND,GetPositionForStone(tile.coord,TileLevel.UNDERGROUND));
+                addHexagon(tile.coord, GetPositionForHexagon(board.size,tile.coord,TileLevel.UNDERGROUND),TileLevel.UNDERGROUND);
+                addStone(tile.coord,TileLevel.UNDERGROUND,GetPositionForStone(board.size, tile.coord,TileLevel.UNDERGROUND));
             }
             if (tile.level == TileLevel.GROUND)
             {
-                addHexagon(tile.coord, GetPositionForHexagon(tile.coord, TileLevel.UNDERGROUND),TileLevel.UNDERGROUND);
-                addHexagon(tile.coord, GetPositionForHexagon(tile.coord, TileLevel.GROUND),TileLevel.GROUND);
+                addHexagon(tile.coord, GetPositionForHexagon(board.size, tile.coord, TileLevel.UNDERGROUND),TileLevel.UNDERGROUND);
+                addHexagon(tile.coord, GetPositionForHexagon(board.size, tile.coord, TileLevel.GROUND),TileLevel.GROUND);
             }
             if (tile.level == TileLevel.HILL)
             {
-                addHexagon(tile.coord, GetPositionForHexagon(tile.coord, TileLevel.UNDERGROUND),TileLevel.UNDERGROUND);
-                addHexagon(tile.coord, GetPositionForHexagon(tile.coord, TileLevel.GROUND),TileLevel.GROUND);
-                addHexagon(tile.coord, GetPositionForHexagon(tile.coord, TileLevel.HILL),TileLevel.HILL);
-                addStone(tile.coord,tile.level, GetPositionForStone(tile.coord,tile.level));
+                addHexagon(tile.coord, GetPositionForHexagon(board.size, tile.coord, TileLevel.UNDERGROUND),TileLevel.UNDERGROUND);
+                addHexagon(tile.coord, GetPositionForHexagon(board.size, tile.coord, TileLevel.GROUND),TileLevel.GROUND);
+                addHexagon(tile.coord, GetPositionForHexagon(board.size, tile.coord, TileLevel.HILL),TileLevel.HILL);
+                addStone(tile.coord,tile.level, GetPositionForStone(board.size, tile.coord,tile.level));
             }
         }
-
+        //setCapturedStones(board);
         return board;
     }
+
+    //
+    // private void setCapturedStones(Board board)
+    // {
+    //addStone(new Coord(, tile.level, GetPositionForStone(tile.coord, tile.level));
+
+    //}
 
     public Material LevelToMaterial(TileLevel level)
     {
@@ -126,7 +131,7 @@ public class BoardFactory : MonoBehaviour
         throw new Exception("Draggable for tile " + tile + " not found");
     }
 
-    public Vector3 GetPositionForStone(Coord coord, TileLevel tileLevel){
+    public Vector3 GetPositionForStone(int size, Coord coord, TileLevel tileLevel){
         float stoneOffset;
         switch (tileLevel)
         {
@@ -137,13 +142,13 @@ public class BoardFactory : MonoBehaviour
                 stoneOffset = 0.13f;
                 break;
         }
-        float x = xqOffSet * ((coord.q - (board.size - 1)) + (coord.r - (board.size - 1))) - (coord.r - (board.size - 1));
-        return new Vector3( x , stoneOffset, zrOffset * (coord.r -(board.size-1)) );
+        float x = xqOffSet * (coord.q - (size - 1) + (coord.r - (size - 1))) - (coord.r - (size - 1));
+        return new Vector3( x , stoneOffset, zrOffset * (coord.r -(size-1)) );
     }
 
-    public Vector3 GetPositionForHexagon(Coord coord, TileLevel tileLevel)
+    public Vector3 GetPositionForHexagon(int size, Coord coord, TileLevel tileLevel)
     {
-        return new Vector3( xqOffSet  * ((coord.q - (board.size - 1)) + (coord.r - (board.size - 1))) - (coord.r - (board.size - 1)), GetTileLevelOffset(tileLevel), zrOffset * (coord.r - (board.size-1) ) );
+        return new Vector3( xqOffSet  * (coord.q - (size - 1) + (coord.r - (size - 1))) - (coord.r - (size - 1)), GetTileLevelOffset(tileLevel), zrOffset * (coord.r - (size-1) ) );
     }
 
     public Board Restart(Settings settings){
@@ -183,14 +188,24 @@ public class BoardFactory : MonoBehaviour
         return tileLevelOffSet;
     }
 
+    internal void CaptureStone(Tile captureStone)
+    {
+        if(Rules.CanCapture(game.board.tiles, game.board.size, game.board.currentPlayer, captureStone))
+        {
+            game.CaptureStone(captureStone);
+            Stone stone = findStoneByTile(captureStone);
+            Destroy(stone.gameObject);
+        }
+    }
+
     public bool placeStone(Stone stone, Hexagon to)
     {
         Tile fromTile = game.board.tiles[stone.coord.q, stone.coord.r];
         Tile toTile = game.board.tiles[to.coord.q, to.coord.r];
-        if (Rules.canMoveStone(game.board, fromTile, toTile))
+        if (Rules.canMoveStone(game.board.tiles, game.board.currentPlayer, game.board.size, fromTile, toTile))
         {
             game.MoveStone(fromTile, toTile);
-            Vector3 toPosition = GetPositionForStone(to.coord, to.getTile().level);
+            Vector3 toPosition = GetPositionForStone(game.board.size, to.coord, to.getTile().level);
             stone.transform.position = toPosition;
             stone.coord = to.coord;
             return true;
@@ -200,11 +215,11 @@ public class BoardFactory : MonoBehaviour
 
     public bool placeHexagon(Hexagon fromHex, Tile to)
     {
-        if (Rules.canBuild(game.board, fromHex.getTile(), to))
+        if (Rules.CanBuild(game.board, fromHex.getTile(), to))
         {
             game.build(fromHex.getTile(), to);
             Tile newTo = game.board.tiles[to.coord.q, to.coord.r];
-            Vector3 toPosition = GetPositionForHexagon(newTo.coord,newTo.level);
+            Vector3 toPosition = GetPositionForHexagon(game.board.size, newTo.coord,newTo.level);
             fromHex.transform.position = toPosition;
             fromHex.coord = newTo.coord;
             fromHex.SetOriginalMaterial(LevelToMaterial(newTo.level));

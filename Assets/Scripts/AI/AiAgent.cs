@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 public class AiAgent
 {
+    private const int CAPTURE_SCORE = 2;
     private Player player;
     private Random random;
 
@@ -12,29 +13,117 @@ public class AiAgent
         this.random = new Random(1);
     }
 
-    public Moves GetNextMove(Board board){
-        return BestMove(board);
+    public ScoredMove GetNextMove(Board board){
+        // Get All capture an enemy and Move Stone
+        List<ScoredMove> scoredMoves = new List<ScoredMove>();
+        scoredMoves.AddRange(CaptureMoves(board));
+        scoredMoves.AddRange(BuildMoves(board));
+
+        scoredMoves.Sort((ScoredMove x, ScoredMove y) => y.score.CompareTo(x.score));
+        return scoredMoves.ToArray()[0];
+
     }
 
-    public ScoredTile[] allPossibleHexToBuildFrom(Board board)
+    private List<Tile> CapturableTiles(Tile[,] tiles, int size)
     {
-        List<ScoredTile> result = new List<ScoredTile>();
-        foreach (Tile tile in board.tiles)
+        List<Tile> captureable= new List<Tile>();
+
+        foreach (Tile tile in tiles)
         {
             if (tile == null)
             {
                 continue;
             }
-            if (Rules.canMoveTile(board, tile.coord))
+            if (tile.occupiatBy == Rules.GetOpponent(player) && Rules.CanCapture(tiles, size, player, tile))
             {
-                int score = 0;
-                score += hasStoneAsNeighbor(board,tile,true);
-                score += fromEnemysHomeLine(board, tile);
-                result.Add(new ScoredTile(tile, score));
+                captureable.Add(tile);
             }
         }
-        result.Sort((ScoredTile x, ScoredTile y) => y.score.CompareTo(x.score));
-        return result.ToArray();
+        return captureable;
+    }
+
+    private List<ScoredMove> CaptureMoves(Board board)
+    {
+        List<ScoredMove> captureMoves = new List<ScoredMove>();
+        foreach (Tile tile in CapturableTiles(board.tiles, board.size))
+        {
+            // Find best Move
+            Board boardAfterCapture = BoardStateModifier.Capture(board, tile);
+            Move stoneMove = GetBestMove(boardAfterCapture.tiles, player,board.size);
+            if(stoneMove != null){
+                captureMoves.Add(ScoredMove.Builder()
+                    .withCaptureStep(tile)
+                    .withMoveStep(stoneMove.from, stoneMove.to)
+                    .addToScore(CAPTURE_SCORE)
+                    .addToScore(stoneMove.score)
+                    .build());
+            }  
+        }
+        return captureMoves;
+    }
+
+    private List<ScoredMove> BuildMoves(Board board)
+    {
+        List<ScoredMove> scoredMoves = new List<ScoredMove>();
+
+        foreach(Tile buildFrom in board.tiles)
+        {
+            if (buildFrom == null) continue;
+
+            if (Rules.canMoveTile(board, buildFrom.coord))
+            {
+                int buildFromScore = CalcScoreForBuildFromTile(board, buildFrom);
+                //for each possible BuildTo 
+                foreach (Tile buildTo in board.tiles)
+                {
+                    if (buildTo == null) continue;
+                    if (Rules.CanBuild(board,buildFrom,buildTo)){
+                        int buildToScore = CalcScoreForBuildToTile(board,buildTo);
+                        // get All build / Caputre moves
+                        Tile[,] tilesAfterBuild = BoardStateModifier.build(board.tiles, buildFrom, buildTo);
+                        foreach(Tile capturable in CapturableTiles(tilesAfterBuild,board.size))
+                        {
+                            scoredMoves.Add(ScoredMove.Builder()
+                                .withBuildStep(buildFrom,buildTo)
+                                .withCaptureStep(capturable)
+                                .addToScore(CAPTURE_SCORE)
+                                .addToScore(buildFromScore)
+                                .addToScore(buildToScore)
+                                .build());
+                        }
+
+                        // get All build / stonemove moves
+                        List<Move> allStoneMoves = GetValidStoneMoves(tilesAfterBuild,player,board.size);
+                        foreach(Move scoredStoneMove in allStoneMoves)
+                        {
+                            scoredMoves.Add(ScoredMove.Builder()
+                                .withBuildStep(buildFrom, buildTo)
+                                .withMoveStep(scoredStoneMove.from, scoredStoneMove.to)
+                                .addToScore(scoredStoneMove.score)
+                                .addToScore(buildFromScore)
+                                .addToScore(buildToScore)
+                                .build());
+                        }
+                    }
+                }
+            }
+        }
+        return scoredMoves;
+    }
+
+    private int CalcScoreForBuildToTile(Board board, Tile buildTo)
+    {
+        int score = 0;
+        score += hasStoneAsNeighbor(board, buildTo, false);
+        return score;
+    }
+
+    private int CalcScoreForBuildFromTile(Board board, Tile tile)
+    {
+        int score = 0;
+        score += hasStoneAsNeighbor(board, tile, true);
+        score += fromEnemysHomeLine(board, tile);
+        return score;
     }
 
     private int fromEnemysHomeLine(Board board, Tile tile)
@@ -53,7 +142,7 @@ public class AiAgent
     private int hasStoneAsNeighbor(Board board, Tile tile, bool takeStone)
     {
         int score = 0;
-        foreach (Tile neighbor in Rules.GetNeighbors(board, tile))
+        foreach (Tile neighbor in Rules.GetNeighbors(board.tiles, board.size, tile))
         {
             if(player == Player.DIGGER)
             {
@@ -74,43 +163,39 @@ public class AiAgent
         return score;
     }
 
-    internal Moves BestMove(Board board)
+    private static Move GetBestMove(Tile[,] tiles, Player currentPlayer,int size)
     {
-        Move buildMove = bestBuild(board);
-        Tile[,] tilesAfterBuild = BoardStateModifier.build(board.tiles, buildMove.from, buildMove.to);
-        Board boardAfterBuild = new Board(board.size, tilesAfterBuild, Step.MOVE, board.currentPlayer, board.settings);
-        Move stoneMove = GetValidStoneMoves(boardAfterBuild)[0];
-        return new Moves(buildMove, stoneMove, board.currentPlayer);
+        return GetValidStoneMoves(tiles,currentPlayer,size).ToArray()[0];
     }
 
-    private static Move[] GetValidStoneMoves(Board board)
+    private static List<Move> GetValidStoneMoves(Tile[,] tiles, Player currentPlayer,int size)
     {
         List<Move> validMoves = new List<Move>();
 
-        foreach (Tile fromTile in board.tiles)
+        foreach (Tile fromTile in tiles)
         {
-            if (fromTile != null && fromTile.occupiatBy == board.currentPlayer)
+            // board.currentPlayer
+            if (fromTile != null && fromTile.occupiatBy == currentPlayer)
             {
-                foreach (Tile tile in Rules.GetNeighbors(board, fromTile))
+                foreach (Tile tile in Rules.GetNeighbors(tiles, size, fromTile))
                 {
-                    if (Rules.canMoveStone(board, fromTile, tile))
+                    if (Rules.canMoveStone(tiles,currentPlayer, size, fromTile, tile))
                     {
                         int score = 0;
-                        score += CloserToGoal(board, fromTile, tile);
+                        score += CloserToGoal(currentPlayer, size, fromTile, tile);
                         validMoves.Add(new Move(fromTile, tile, score));
                     }
                 }
             }
         }
         validMoves.Sort((Move x, Move y) => y.score.CompareTo(x.score));
-        return validMoves.ToArray();
+        return validMoves;
     }
 
-    private static int CloserToGoal(Board board, Tile fromTile, Tile toTile)
+    private static int CloserToGoal(Player currentPlayer, int size, Tile fromTile, Tile toTile)
     {
-
-        Player opponent = Rules.GetOpponent(board.currentPlayer);
-        int goalR = Rules.homeLine(opponent, board.size); //0 or 6
+        Player opponent = Rules.GetOpponent(currentPlayer);
+        int goalR = Rules.homeLine(opponent, size); //0 or 6
         if (Math.Abs(goalR - toTile.coord.r) < Math.Abs(goalR - fromTile.coord.r))
         {
             return 1;
@@ -136,21 +221,4 @@ public class AiAgent
         }
         return result.ToArray();
     }
-
-    public Move bestBuild(Board board)
-    {
-        ScoredTile[] allFrom = allPossibleHexToBuildFrom(board);
-        ScoredTile[] allTo = allPossibleHexToBuildTo(board);
-
-
-        Tile fromTile = allFrom[0].tile;
-        Tile toTile = allTo[0].tile;
-        while (!Rules.canBuild(board, fromTile, toTile))
-        {
-            fromTile = allFrom[random.Next(allFrom.Length - 1)].tile;
-            toTile = allTo[random.Next(allTo.Length - 1)].tile;
-        }
-        return new Move(fromTile, toTile, 1);
-    }
-
 }

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 [RequireComponent(typeof(Selector))]
 [RequireComponent(typeof(BoardFactory))]
@@ -36,25 +37,18 @@ public class Game : MonoBehaviour {
         board = new Board(board.size, tiles, Step.MOVE, board.currentPlayer,board.settings);
     }
 
-    private void build(Move move)
-    {
-        Debug.Log(move);
-        boardFactory.placeHexagon(move.from, move.to);
-    }
-
-    private void MoveStone(Move move)
-    {
-        Debug.Log(move);
-        Stone stone = (Stone)boardFactory.findStoneByTile(move.from);
-        Hexagon toHex = (Hexagon)boardFactory.findByTile(move.to);
-        boardFactory.placeStone(stone, toHex);
-    }
-
     internal void MoveStone(Tile fromTile, Tile toTile)
     {
         board = BoardStateModifier.moveStone(board, fromTile, toTile);
         GameOverCheck();
     }
+
+    internal void CaptureStone(Tile captureStone)
+    {
+        board = BoardStateModifier.Capture(board, captureStone);
+        GameOverCheck();
+    }
+
 
     private void GameOverCheck()
     {
