@@ -4,7 +4,10 @@ using System.Collections.Generic;
 
 public class AiAgent
 {
-    private const int CAPTURE_SCORE = 2;
+    private const int CAPTURE_SCORE = 3;
+    private const int ESCAPE_THREAT = 5;
+    private const int PLACE_TILE_ON_HOME_LINE = 2;
+
     private Player player;
     private Random random;
 
@@ -115,6 +118,18 @@ public class AiAgent
     {
         int score = 0;
         score += hasStoneAsNeighbor(board, buildTo, false);
+        score += OnEnemyHomeLine(board.size, buildTo);
+        return score;
+    }
+
+    private int OnEnemyHomeLine(int size, Tile tile)
+    {
+        int score = 0;
+        int homeLineR = Rules.homeLine(Rules.GetOpponent(player), size);
+        if (homeLineR == tile.coord.r)
+        {
+            score += PLACE_TILE_ON_HOME_LINE;
+        }
         return score;
     }
 
@@ -177,19 +192,32 @@ public class AiAgent
             // board.currentPlayer
             if (fromTile != null && fromTile.occupiatBy == currentPlayer)
             {
-                foreach (Tile tile in Rules.GetNeighbors(tiles, size, fromTile))
+                foreach (Tile toTile in Rules.GetNeighbors(tiles, size, fromTile))
                 {
-                    if (Rules.canMoveStone(tiles,currentPlayer, size, fromTile, tile))
+                    if (Rules.canMoveStone(tiles,currentPlayer, size, fromTile, toTile))
                     {
                         int score = 0;
-                        score += CloserToGoal(currentPlayer, size, fromTile, tile);
-                        validMoves.Add(new Move(fromTile, tile, score));
+                        score += CloserToGoal(currentPlayer, size, fromTile, toTile);
+                        score += EscapeThreat(tiles, size, fromTile, toTile, currentPlayer);
+                        validMoves.Add(new Move(fromTile, toTile, score));
                     }
                 }
             }
         }
         validMoves.Sort((Move x, Move y) => y.score.CompareTo(x.score));
         return validMoves;
+    }
+
+    private static int EscapeThreat(Tile[,] tiles, int size, Tile fromTile, Tile tile, Player currentPlayer)
+    {
+        int score = 0;
+        bool fromUnderThreat = Rules.UnderThreat(tiles, size, fromTile,currentPlayer);
+        bool toUnderThreat = Rules.UnderThreat(tiles, size, fromTile, currentPlayer);
+        if(fromUnderThreat && !toUnderThreat)
+        {
+            score += ESCAPE_THREAT;
+        }
+        return score;
     }
 
     private static int CloserToGoal(Player currentPlayer, int size, Tile fromTile, Tile toTile)

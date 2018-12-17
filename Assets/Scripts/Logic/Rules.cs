@@ -6,17 +6,6 @@ using System.Linq;
 public class Rules {
     private static int THREAT_THRESHHOLD = 1;
 
-    public static bool IsThreaten(Board board, Player player)
-    {
-        Player opponent = GetOpponent(board.currentPlayer);
-        foreach(Tile tile in board.tiles){
-            if(tile.occupiatBy == player && CountNeighborsOccupiatBy(board.tiles, board.size,tile, opponent ) >= THREAT_THRESHHOLD){
-                return true;
-            }
-        }
-        return false;
-    }
-
     public static Player? CheckWinningCondition(Board board)
     {
         int diggerHomeLine = Rules.homeLine(Player.DIGGER, board.size);
@@ -200,6 +189,25 @@ public class Rules {
         }
         return false;
     }
+
+    internal static bool UnderThreat(Tile[,] tiles, int size, Tile tile, Player currentPlayer)
+    {
+        return tile.occupiatBy == currentPlayer && CountNeighborsOccupiatBy(tiles, size, tile, GetOpponent(currentPlayer)) >= THREAT_THRESHHOLD;
+    }
+
+    public static bool IsThreaten(Board board, Player player)
+    {
+        Player opponent = GetOpponent(board.currentPlayer);
+        foreach (Tile tile in board.tiles)
+        {
+            if (UnderThreat(board.tiles, board.size, tile, board.currentPlayer))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
 
     private static TileLevel GetRequiredTileLevel(Player player)
     {

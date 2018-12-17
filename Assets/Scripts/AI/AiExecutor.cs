@@ -14,6 +14,8 @@ public class AiExecutor : MonoBehaviour {
     private GameState knownGameState;
     private bool thinking = false;
 
+    private float timeToThink = 1f;
+
     private void Start()
     {
         game = FindObjectOfType<Game>();
@@ -73,18 +75,18 @@ public class AiExecutor : MonoBehaviour {
     }
 
     IEnumerator AiMove(AiAgent agent){
-        yield return new WaitForSeconds(2f);
+        yield return new WaitForSeconds(timeToThink);
         if(thinking){
             ScoredMove nextMove = agent.GetNextMove(game.board);
             if(nextMove.captureStone != null && nextMove.buildFrom == null)
             {
                 CaptureStone(nextMove);
-                yield return new WaitForSeconds(2f);
+                yield return new WaitForSeconds(timeToThink);
             }
             else
             {
                 build(nextMove);
-                yield return new WaitForSeconds(2f);
+                yield return new WaitForSeconds(timeToThink);
             }
 
             if (thinking)
