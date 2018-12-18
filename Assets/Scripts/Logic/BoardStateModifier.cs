@@ -9,7 +9,7 @@ public class BoardStateModifier
         int minR = 0;
         int maxR =  offSet * 2;
         //  +2 to avoid index out of bound on neighbors
-        Tile[,] tiles = new Tile[offSet * 2+2 ,offSet *2+2];
+        Tile[,] tiles = new Tile[size * 2 , size *2];
 
         for (int r = minR; r <= maxR; r++ ){
                 
