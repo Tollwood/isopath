@@ -6,7 +6,10 @@ public class AiAgent
 {
     private const int CAPTURE_SCORE = 3;
     private const int ESCAPE_THREAT = 5;
+    private const int AVOID_CAPTURE = -5;
     private const int PLACE_TILE_ON_HOME_LINE = 2;
+    private const int BUILD_FROM_SAME_LEVEL = -1;
+    private const int BUILD_TO_SAME_LEVEL = -1;
 
     private Player player;
     private Random random;
@@ -119,6 +122,7 @@ public class AiAgent
         int score = 0;
         score += hasStoneAsNeighbor(board, buildTo, false);
         score += OnEnemyHomeLine(board.size, buildTo);
+        score += BuildToSameLevel(buildTo);
         return score;
     }
 
@@ -138,6 +142,27 @@ public class AiAgent
         int score = 0;
         score += hasStoneAsNeighbor(board, tile, true);
         score += fromEnemysHomeLine(board, tile);
+        score += BuildFromSameLevel(tile);
+        return score;
+    }
+
+    private int BuildFromSameLevel(Tile tile)
+    {
+        int score = 0;
+        if(player == Player.CLIMBER && Rules.GetRequiredTileLevel(player) == tile.level)
+        {
+            score += BUILD_FROM_SAME_LEVEL;
+        }
+        return score;
+    }
+
+    private int BuildToSameLevel(Tile tile)
+    {
+        int score = 0;
+        if (player == Player.DIGGER && Rules.GetRequiredTileLevel(player) == tile.level)
+        {
+            score += BUILD_TO_SAME_LEVEL;
+        }
         return score;
     }
 
@@ -199,6 +224,7 @@ public class AiAgent
                         int score = 0;
                         score += CloserToGoal(currentPlayer, size, fromTile, toTile);
                         score += EscapeThreat(tiles, size, fromTile, toTile, currentPlayer);
+                        score += AvoidCapture(tiles,size,toTile,currentPlayer);
                         validMoves.Add(new Move(fromTile, toTile, score));
                     }
                 }
@@ -208,11 +234,22 @@ public class AiAgent
         return validMoves;
     }
 
+    private static int AvoidCapture(Tile[,] tiles, int size, Tile tile, Player currentPlayer)
+    {
+        int score = 0;
+        if (Rules.CountNeighborsOccupiatBy(tiles,size,tile, Rules.GetOpponent(currentPlayer)) > Rules.THREAT_THRESHHOLD)
+        {
+            score += AVOID_CAPTURE;
+        }
+
+        return score;
+    }
+
     private static int EscapeThreat(Tile[,] tiles, int size, Tile fromTile, Tile tile, Player currentPlayer)
     {
         int score = 0;
         bool fromUnderThreat = Rules.UnderThreat(tiles, size, fromTile,currentPlayer);
-        bool toUnderThreat = Rules.UnderThreat(tiles, size, fromTile, currentPlayer);
+        bool toUnderThreat = Rules.UnderThreat(tiles, size, tile, currentPlayer);
         if(fromUnderThreat && !toUnderThreat)
         {
             score += ESCAPE_THREAT;

@@ -4,7 +4,7 @@ using System.Linq;
 
 [System.Serializable]
 public class Rules {
-    private static int THREAT_THRESHHOLD = 1;
+    public static int THREAT_THRESHHOLD = 1;
 
     public static Player? CheckWinningCondition(Board board)
     {
@@ -42,7 +42,7 @@ public class Rules {
         return player == Player.DIGGER ? Player.CLIMBER : Player.DIGGER;
     }
 
-    private static int CountNeighborsOccupiatBy( Tile[,] tiles, int size, Tile tile, Player occupiant)
+    public static int CountNeighborsOccupiatBy( Tile[,] tiles, int size, Tile tile, Player occupiant)
     {
         int count = 0;
         foreach(Tile neighborTile in Rules.GetNeighbors(tiles, size,tile)){
@@ -209,7 +209,7 @@ public class Rules {
     }
 
 
-    private static TileLevel GetRequiredTileLevel(Player player)
+    public static TileLevel GetRequiredTileLevel(Player player)
     {
         return player == Player.DIGGER ? TileLevel.UNDERGROUND : TileLevel.HILL;
     }

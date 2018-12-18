@@ -74,10 +74,6 @@ public class BoardStateModifier
 
     public static Board Capture(Board board, Tile tile)
     {
-
-        if(!Rules.CanCapture(board.tiles, board.size, board.currentPlayer, tile)){
-            throw new Exception("Trying to caputre but its not allowed");
-        }
         Tile[,] copyOfTiles = new Tile[board.tiles.GetLength(0), board.tiles.GetLength(1)];
         Array.Copy(board.tiles, copyOfTiles, board.tiles.Length);
 

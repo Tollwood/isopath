@@ -14,7 +14,7 @@ public class AiExecutor : MonoBehaviour {
     private GameState knownGameState;
     private bool thinking = false;
 
-    private float timeToThink = 1f;
+    private float timeToThink = .1f;
 
     private void Start()
     {
