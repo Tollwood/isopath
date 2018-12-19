@@ -4,13 +4,16 @@ using System.Collections.Generic;
 
 public class AiAgent
 {
+    private const int WINNING_SCORE = 100;
     private const int CAPTURE_SCORE = 3;
     private const int ESCAPE_THREAT = 5;
     private const int AVOID_CAPTURE = -5;
     private const int PLACE_TILE_ON_HOME_LINE = 2;
     private const int BUILD_FROM_SAME_LEVEL = -1;
     private const int BUILD_TO_SAME_LEVEL = -1;
-
+    private const int CLOSER_TO_GOAL = 1;
+    private const int MOVE_TO_BUILD_SCORE = 1;
+    private const int BLOCK_OPPONENT = 2;
     private Player player;
     private Random random;
 
@@ -55,7 +58,7 @@ public class AiAgent
         {
             // Find best Move
             Board boardAfterCapture = BoardStateModifier.Capture(board, tile);
-            Move stoneMove = GetBestMove(boardAfterCapture.tiles, player,board.size);
+            Move stoneMove = GetBestMove(boardAfterCapture.tiles, player,board.size, null);
             if(stoneMove != null){
                 captureMoves.Add(ScoredMove.Builder()
                     .withCaptureStep(tile)
@@ -99,7 +102,7 @@ public class AiAgent
                         }
 
                         // get All build / stonemove moves
-                        List<Move> allStoneMoves = GetValidStoneMoves(tilesAfterBuild,player,board.size);
+                        List<Move> allStoneMoves = GetValidStoneMoves(tilesAfterBuild,player,board.size, buildTo);
                         foreach(Move scoredStoneMove in allStoneMoves)
                         {
                             scoredMoves.Add(ScoredMove.Builder()
@@ -123,16 +126,46 @@ public class AiAgent
         score += hasStoneAsNeighbor(board, buildTo, false);
         score += OnEnemyHomeLine(board.size, buildTo);
         score += BuildToSameLevel(buildTo);
+        score += BlockOpponent(board.tiles, board.size, buildTo,true);
         return score;
+    }
+
+    private int BlockOpponent(Tile[,] tiles, int size, Tile tile, bool buildingTo)
+    {
+        int score = 0;
+        foreach(Tile neighbor in Rules.GetNeighbors(tiles, size, tile))
+        {
+            if(neighbor.occupiatBy == Rules.GetOpponent(player))
+            {
+                //CLIMBER
+                if (buildingTo && player == Player.CLIMBER && tile.level != TileLevel.HILL)
+                {
+                    score += BLOCK_OPPONENT;
+                    // get distance to homeLine
+                    // the close the more critical     
+                }
+                //DIGGER
+                else if (!buildingTo && player == Player.DIGGER &&tile.level != TileLevel.UNDERGROUND)
+                {
+                    score += BLOCK_OPPONENT;
+                }
+            }
+        }
+        return score;
+
     }
 
     private int OnEnemyHomeLine(int size, Tile tile)
     {
         int score = 0;
         int homeLineR = Rules.homeLine(Rules.GetOpponent(player), size);
-        if (homeLineR == tile.coord.r)
+        if (homeLineR == tile.coord.r && player == Player.CLIMBER)
         {
             score += PLACE_TILE_ON_HOME_LINE;
+        }
+        else if(homeLineR == tile.coord.r && player == Player.DIGGER)
+        {
+            score -= PLACE_TILE_ON_HOME_LINE;
         }
         return score;
     }
@@ -143,6 +176,7 @@ public class AiAgent
         score += hasStoneAsNeighbor(board, tile, true);
         score += fromEnemysHomeLine(board, tile);
         score += BuildFromSameLevel(tile);
+        score += BlockOpponent(board.tiles, board.size, tile, false);
         return score;
     }
 
@@ -203,12 +237,12 @@ public class AiAgent
         return score;
     }
 
-    private static Move GetBestMove(Tile[,] tiles, Player currentPlayer,int size)
+    private static Move GetBestMove(Tile[,] tiles, Player currentPlayer,int size, Tile buildTo)
     {
-        return GetValidStoneMoves(tiles,currentPlayer,size).ToArray()[0];
+        return GetValidStoneMoves(tiles,currentPlayer,size, buildTo).ToArray()[0];
     }
 
-    private static List<Move> GetValidStoneMoves(Tile[,] tiles, Player currentPlayer,int size)
+    private static List<Move> GetValidStoneMoves(Tile[,] tiles, Player currentPlayer,int size, Tile buildTo)
     {
         List<Move> validMoves = new List<Move>();
 
@@ -222,9 +256,11 @@ public class AiAgent
                     if (Rules.canMoveStone(tiles,currentPlayer, size, fromTile, toTile))
                     {
                         int score = 0;
-                        score += CloserToGoal(currentPlayer, size, fromTile, toTile);
-                        score += EscapeThreat(tiles, size, fromTile, toTile, currentPlayer);
-                        score += AvoidCapture(tiles,size,toTile,currentPlayer);
+                        score += CloserToGoal(currentPlayer, size, fromTile, toTile) ? CLOSER_TO_GOAL :0;
+                        score += EscapeThreat(tiles, size, fromTile, toTile, currentPlayer)? ESCAPE_THREAT : 0;
+                        score += AvoidCapture(tiles,size,toTile,currentPlayer) ? AVOID_CAPTURE : 0;
+                        score += Win(size, toTile, currentPlayer) ? WINNING_SCORE: 0;
+                        score += MoveToBuild(buildTo, toTile) ? MOVE_TO_BUILD_SCORE : 0;
                         validMoves.Add(new Move(fromTile, toTile, score));
                     }
                 }
@@ -234,38 +270,32 @@ public class AiAgent
         return validMoves;
     }
 
-    private static int AvoidCapture(Tile[,] tiles, int size, Tile tile, Player currentPlayer)
+    private static bool MoveToBuild(Tile buildTo, Tile toTile)
     {
-        int score = 0;
-        if (Rules.CountNeighborsOccupiatBy(tiles,size,tile, Rules.GetOpponent(currentPlayer)) > Rules.THREAT_THRESHHOLD)
-        {
-            score += AVOID_CAPTURE;
-        }
-
-        return score;
+        return buildTo != null && toTile.coord.Equals(buildTo.coord);
     }
 
-    private static int EscapeThreat(Tile[,] tiles, int size, Tile fromTile, Tile tile, Player currentPlayer)
+    private static bool Win(int size, Tile toTile, Player currentPlayer)
     {
-        int score = 0;
+        return Rules.homeLine(Rules.GetOpponent(currentPlayer), size) == toTile.coord.r;
+    }
+
+    private static bool AvoidCapture(Tile[,] tiles, int size, Tile tile, Player currentPlayer)
+    {
+        return Rules.CountNeighborsOccupiatBy(tiles, size, tile, Rules.GetOpponent(currentPlayer)) > Rules.THREAT_THRESHHOLD;
+    }
+
+    private static bool EscapeThreat(Tile[,] tiles, int size, Tile fromTile, Tile tile, Player currentPlayer)
+    {
         bool fromUnderThreat = Rules.UnderThreat(tiles, size, fromTile,currentPlayer);
         bool toUnderThreat = Rules.UnderThreat(tiles, size, tile, currentPlayer);
-        if(fromUnderThreat && !toUnderThreat)
-        {
-            score += ESCAPE_THREAT;
-        }
-        return score;
+        return fromUnderThreat && !toUnderThreat;
     }
 
-    private static int CloserToGoal(Player currentPlayer, int size, Tile fromTile, Tile toTile)
+    private static bool CloserToGoal(Player currentPlayer, int size, Tile fromTile, Tile toTile)
     {
-        Player opponent = Rules.GetOpponent(currentPlayer);
-        int goalR = Rules.homeLine(opponent, size); //0 or 6
-        if (Math.Abs(goalR - toTile.coord.r) < Math.Abs(goalR - fromTile.coord.r))
-        {
-            return 1;
-        }
-        return 0;
+        int goalR = Rules.homeLine(Rules.GetOpponent(currentPlayer), size); //0 or 6
+        return Math.Abs(goalR - toTile.coord.r) < Math.Abs(goalR - fromTile.coord.r);
     }
 
     public ScoredTile[] allPossibleHexToBuildTo(Board board)

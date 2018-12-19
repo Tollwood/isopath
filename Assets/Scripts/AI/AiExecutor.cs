@@ -14,7 +14,7 @@ public class AiExecutor : MonoBehaviour {
     private GameState knownGameState;
     private bool thinking = false;
 
-    private float timeToThink = .1f;
+    private float timeToThink = .5f;
 
     private void Start()
     {
@@ -118,8 +118,11 @@ public class AiExecutor : MonoBehaviour {
     {
         Debug.Log(move);
         Stone stone = boardFactory.findStoneByTile(move.moveFrom);
-        Hexagon toHex = (Hexagon)boardFactory.findByTile(move.moveTo);
-        boardFactory.placeStone(stone, toHex);
+        Hexagon toHex = (Hexagon)boardFactory.findHexagonByTile(move.moveTo);
+        if(toHex != null)
+        {
+            boardFactory.placeStone(stone, toHex);
+        }
     }
 
 }

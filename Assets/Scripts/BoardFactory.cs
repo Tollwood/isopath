@@ -159,7 +159,7 @@ public class BoardFactory : MonoBehaviour
         return create(settings);
     }
 
-    public Draggable findByTile(Tile tile){
+    public Hexagon findHexagonByTile(Tile tile){
         foreach (Transform child in uiContainer)
         {
             Hexagon hexagon = child.GetComponent<Hexagon>();
@@ -167,7 +167,7 @@ public class BoardFactory : MonoBehaviour
                 return hexagon;
             }
         }
-        throw new Exception("Draggable for tile " + tile + " not found");
+        return null;
     }
 
     private float GetTileLevelOffset(TileLevel tileLevel)
@@ -230,7 +230,7 @@ public class BoardFactory : MonoBehaviour
 
     public bool placeHexagon(Tile from, Tile to)
     {
-        Hexagon fromHex = (Hexagon)findByTile(from);
+        Hexagon fromHex = (Hexagon)findHexagonByTile(from);
         return placeHexagon(fromHex, to);
 
     }
