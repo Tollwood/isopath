@@ -72,6 +72,12 @@ public class BoardStateModifier
         return copyOfTiles;
     }
 
+    public static Board build(Board board, Tile from, Tile to)
+    {
+        Tile[,] tiles = build(board.tiles, from, to);
+        return new Board(board.size, tiles, Step.MOVE, board.currentPlayer, board.settings);
+    }
+
     public static Board Capture(Board board, Tile tile)
     {
         Tile[,] copyOfTiles = new Tile[board.tiles.GetLength(0), board.tiles.GetLength(1)];

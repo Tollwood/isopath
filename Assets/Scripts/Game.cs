@@ -33,8 +33,7 @@ public class Game : MonoBehaviour {
 
    
     public void build(Tile from, Tile to){
-        Tile[,] tiles = BoardStateModifier.build( board.tiles, from, to);
-        board = new Board(board.size, tiles, Step.MOVE, board.currentPlayer,board.settings);
+        board = BoardStateModifier.build(board, from, to);
     }
 
     internal void MoveStone(Tile fromTile, Tile toTile)

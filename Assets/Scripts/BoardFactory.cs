@@ -58,16 +58,8 @@ public class BoardFactory : MonoBehaviour
                 addStone(tile.coord,tile.level, GetPositionForStone(board.size, tile.coord,tile.level));
             }
         }
-        //setCapturedStones(board);
         return board;
     }
-
-    //
-    // private void setCapturedStones(Board board)
-    // {
-    //addStone(new Coord(, tile.level, GetPositionForStone(tile.coord, tile.level));
-
-    //}
 
     public Material LevelToMaterial(TileLevel level)
     {
@@ -128,7 +120,7 @@ public class BoardFactory : MonoBehaviour
                 return stone;
             }
         }
-        throw new Exception("Draggable for tile " + tile + " not found");
+        return null;
     }
 
     public Vector3 GetPositionForStone(int size, Coord coord, TileLevel tileLevel){
@@ -194,7 +186,10 @@ public class BoardFactory : MonoBehaviour
         {
             game.CaptureStone(captureStone);
             Stone stone = findStoneByTile(captureStone);
-            Destroy(stone.gameObject);
+            if(stone != null)
+            {
+                Destroy(stone.gameObject);
+            }
         }
     }
 

@@ -16,7 +16,7 @@ public class Table : MonoBehaviour {
             currentSize = game.board.settings.size;
             switch (currentSize){
                 case 3:
-                    transform.localPosition = new Vector3(0, -6.49f, 0);
+                    transform.localPosition = new Vector3(0, -6.3f, 0);
                     transform.localScale = new Vector3(0.12f, 0.1f, 0.12f);
                     break;
                 case 4:

@@ -39,6 +39,11 @@ public class MouseInput: MonoBehaviour {
 
         if (Input.touchCount == 1 && hitting && !isDragging())
         {
+            Stone stone = hit.transform.GetComponent<Stone>();
+            if (stone != null && Rules.CanCapture(game.board.tiles, game.board.size, game.board.currentPlayer, stone.getTile()))
+            {
+                boardFactory.CaptureStone(stone.getTile());
+            }
             startDragging(hit.transform);
         }
         else if(Input.touchCount > 1 && isDragging()){
