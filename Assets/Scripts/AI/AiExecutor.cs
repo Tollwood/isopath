@@ -77,7 +77,7 @@ public class AiExecutor : MonoBehaviour {
     IEnumerator AiMove(AiAgent agent){
         yield return new WaitForSeconds(timeToThink);
         if(thinking){
-            ScoredMove nextMove = agent.GetNextMove(game.board);
+            ScoredMove nextMove = agent.Minmax(game.board,1,true);
             if(nextMove.captureStone != null && nextMove.buildFrom == null)
             {
                 CaptureStone(nextMove);
@@ -119,7 +119,7 @@ public class AiExecutor : MonoBehaviour {
         Debug.Log(move);
         Stone stone = boardFactory.findStoneByTile(move.moveFrom);
         Hexagon toHex = (Hexagon)boardFactory.findHexagonByTile(move.moveTo);
-        if(toHex != null)
+        if(toHex != null && stone != null)
         {
             boardFactory.placeStone(stone, toHex);
         }
