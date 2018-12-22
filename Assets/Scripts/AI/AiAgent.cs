@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Linq;
 using System.Collections.Generic;
 
 public class AiAgent
@@ -19,7 +20,7 @@ public class AiAgent
 
     public AiAgent(Player player){
         this.player = player;
-        this.random = new Random(1);
+        this.random = new Random(new Random().Next());
     }
 
     public ScoredMove GetNextMove(Board board){
@@ -29,7 +30,9 @@ public class AiAgent
         scoredMoves.AddRange(BuildMoves(board));
 
         scoredMoves.Sort((ScoredMove x, ScoredMove y) => y.score.CompareTo(x.score));
-        return scoredMoves.ToArray()[0];
+        int maxScore = scoredMoves.ToArray()[0].score;
+        ScoredMove[] bestMoves = scoredMoves.Where((move) => move.score == maxScore).ToArray();
+        return bestMoves[random.Next(bestMoves.Length-1)];
 
     }
 
