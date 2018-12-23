@@ -117,9 +117,14 @@ public class Rules {
 
     }
 
-    public static bool CanCapture(Tile[,] tiles, int size, Player player,  Tile captureFrom)
+    public static bool CanCapture(Tile[,] tiles, int size, Tile captureFrom)
     {
-        return CountNeighborsOccupiatBy(tiles, size, captureFrom, player) > THREAT_THRESHHOLD;
+        if(captureFrom.occupiatBy == null)
+        {
+            return false;
+        }
+        Player  player = captureFrom.occupiatBy.Value;
+        return CountNeighborsOccupiatBy(tiles, size, captureFrom, Rules.GetOpponent(player)) > THREAT_THRESHHOLD;
     }
 
    

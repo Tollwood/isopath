@@ -6,15 +6,17 @@ using System.Collections.Generic;
 public class AiAgent
 {
     private const int WINNING_SCORE = 100;
-    private const int CAPTURE_SCORE = 3;
-    private const int ESCAPE_THREAT = 5;
+    private const int CAPTURE_SCORE = 5;
+    private const int ESCAPE_THREAT = 1;
     private const int AVOID_CAPTURE = -5;
     private const int PLACE_TILE_ON_HOME_LINE = 2;
     private const int BUILD_FROM_SAME_LEVEL = -1;
     private const int BUILD_TO_SAME_LEVEL = -1;
-    private const int CLOSER_TO_GOAL = 1;
+    private const int CLOSER_TO_GOAL = 2;
     private const int MOVE_TO_BUILD_SCORE = 1;
+    private const int NEXT_TO_STONE = 1;
     private const int BLOCK_OPPONENT = 2;
+
     private Player player;
     private Random random;
 
@@ -46,7 +48,7 @@ public class AiAgent
             {
                 continue;
             }
-            if (tile.occupiatBy == Rules.GetOpponent(player) && Rules.CanCapture(tiles, size, player, tile))
+            if (tile.occupiatBy == Rules.GetOpponent(player) && Rules.CanCapture(tiles, size, tile))
             {
                 captureable.Add(tile);
             }

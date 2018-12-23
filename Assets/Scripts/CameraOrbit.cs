@@ -18,8 +18,9 @@ public class CameraOrbit : MonoBehaviour
 
     public float _fieldOfView = 10f;
     public float zoomOutMin = 1.5f;
-    public float zoomInitial = 71f;
-    public float zoomOutMax = 20f;
+    public float zoomInitialLandscape = 71f;
+    public float zoomInitialPortrait = 110f;
+    public float zoomOutMax = 60f;
     public float zoomSpeed = .1f;
 
     public bool shouldOrbit = true;
@@ -35,7 +36,15 @@ public class CameraOrbit : MonoBehaviour
     void Start()
     {
         this._XForm_Parent = this.transform.parent;
-        _fieldOfView = zoomInitial;
+        if(Screen.orientation == ScreenOrientation.Landscape)
+        {
+            _fieldOfView = zoomInitialLandscape;
+        }
+        else
+        {
+            _fieldOfView = zoomInitialPortrait;
+        }
+
     }
 
 
@@ -146,7 +155,7 @@ public class CameraOrbit : MonoBehaviour
         _LocalRotation.y = 90f;
         _LocalRotation.x = 0f;
 
-        _fieldOfView = zoomInitial;
+        _fieldOfView = Screen.orientation == ScreenOrientation.Landscape ? zoomInitialLandscape : zoomInitialPortrait;
         shouldOrbit = false;
     }
     public void startOrbit(){

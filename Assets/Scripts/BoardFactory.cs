@@ -16,23 +16,19 @@ public class BoardFactory : MonoBehaviour
     public float xqOffSet = 1.7320508f;
     public float zrOffset = 1.5f;
 
-    public Transform uiContainer;
+    private Transform uiContainer;
 
     private Game game;
 
-    private void Awake()
+    internal Board create(Settings settings, Game newGame)
     {
-        uiContainer = Instantiate(new GameObject(), new Vector3(0, 0, 0), Quaternion.Euler(new Vector3(0, 0, 0))).transform;
-        uiContainer.name = "boardElements";
-    }
-
-    private void Start()
-    {
-        game = FindObjectOfType<Game>();
-    }
-    internal Board create(Settings settings)
-    {
-        
+        if(uiContainer == null)
+        {
+            this.game = newGame;
+            uiContainer = new GameObject().transform;
+            uiContainer.parent = game.transform;
+            uiContainer.name = "boardElements";
+        }
         Board board = new Board(settings, BoardStateModifier.ResetTiles(settings.size));
 
         foreach (Tile tile in board.tiles)
@@ -148,7 +144,7 @@ public class BoardFactory : MonoBehaviour
         {
             Destroy(child.gameObject);
         }
-        return create(settings);
+        return create(settings,game);
     }
 
     public Hexagon findHexagonByTile(Tile tile){
@@ -182,7 +178,7 @@ public class BoardFactory : MonoBehaviour
 
     internal void CaptureStone(Tile captureStone)
     {
-        if(Rules.CanCapture(game.board.tiles, game.board.size, game.board.currentPlayer, captureStone))
+        if(Rules.CanCapture(game.board.tiles, game.board.size, captureStone))
         {
             game.CaptureStone(captureStone);
             Stone stone = findStoneByTile(captureStone);

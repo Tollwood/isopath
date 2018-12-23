@@ -27,7 +27,7 @@ public class Game : MonoBehaviour {
     {
         cameraOrbit = FindObjectOfType<CameraOrbit>();
         menuController = FindObjectOfType<MenuController>();
-        board = boardFactory.create(settings);
+        board = boardFactory.create(settings,this);
         gameState = GameState.AI_PLAYING;
     }
 
@@ -53,6 +53,11 @@ public class Game : MonoBehaviour {
     {
         if (Rules.CheckWinningCondition(board) != null)
         {
+            if(gameState == GameState.AI_PLAYING)
+            {
+                Restart();
+                return;
+            }
             gameState = GameState.GAME_OVER;
             menuController.OnGameOverMenu();
         }
