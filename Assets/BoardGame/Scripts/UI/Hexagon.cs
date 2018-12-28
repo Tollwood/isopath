@@ -5,7 +5,7 @@ public class Hexagon : MonoBehaviour, Draggable{
     public  Material hoverMaterial;
     public Material originalMaterial;
     private MeshRenderer meshRenderer;
-    public Coord coord;
+    public Tile tile;
     private Game game;
 
     private void Awake()
@@ -30,11 +30,7 @@ public class Hexagon : MonoBehaviour, Draggable{
 
     public bool isDraggable()
     {
-        return Rules.canMoveTile(game.board,coord);
-    }
-
-    public Tile getTile(){
-        return game.board.tiles[coord.q,coord.r];
+        return Rules.canMoveTile(game.board,tile.coord);
     }
 
     internal void Highlight()
@@ -42,11 +38,11 @@ public class Hexagon : MonoBehaviour, Draggable{
         hoverMaterial = originalMaterial;
         Color color = hoverMaterial.color;
         meshRenderer.material = hoverMaterial; 
-        Debug.Log(coord);
+        Debug.Log(tile.coord);
     }
 
     public Coord GetCoord()
     {
-        return coord;
+        return tile.coord;
     }
 }

@@ -6,8 +6,8 @@ public class MouseInput: MonoBehaviour {
     public new Camera camera;
     private Transform draggedObject;
     private Vector3 startPosition;
-    private Plane dragPlane = new Plane(Vector3.up, new Vector3(0, 3, 0));
-    private Vector3 dragScale = new Vector3(.5f, .5f, .5f);
+    private Plane dragPlane;
+    public Vector3 dragScale;
     private Vector3 dragOffSet = new Vector3(0, 0, 0);
     private BoardFactory boardFactory;
     private Game game;
@@ -15,6 +15,9 @@ public class MouseInput: MonoBehaviour {
     {
         boardFactory = FindObjectOfType<BoardFactory>();
         game = FindObjectOfType<Game>();
+
+        dragPlane = new Plane(Vector3.up, new Vector3(0, 3 * boardFactory.scale, 0));
+        dragScale = new Vector3(.5f * boardFactory.scale, .5f * boardFactory.scale, .5f * boardFactory.scale);
     }
 
     void Update()
@@ -37,7 +40,8 @@ public class MouseInput: MonoBehaviour {
         Ray ray = camera.ScreenPointToRay(Input.mousePosition);
         bool hitting = Physics.Raycast(ray, out hit);
 
-        if (Input.touchCount == 1 && hitting && !isDragging())
+
+        if (Input.touchCount == 1 && Input.GetTouch(0).phase == TouchPhase.Began && hitting && !isDragging())
         {
             Stone stone = hit.transform.GetComponent<Stone>();
             if (stone != null && Rules.CanCapture(game.board.tiles, game.board.size, stone.getTile()))
@@ -62,7 +66,7 @@ public class MouseInput: MonoBehaviour {
                 draggedObject.position = startPosition;
             }
 
-            draggedObject.transform.localScale = new Vector3(1, 1, 1);
+            draggedObject.transform.localScale = new Vector3(boardFactory.scale, boardFactory.scale, boardFactory.scale);
             draggedObject.GetComponent<Collider>().enabled = true;
             draggedObject = null;
 
@@ -96,7 +100,7 @@ public class MouseInput: MonoBehaviour {
             else {
                 draggedObject.position = startPosition;    
             }
-            draggedObject.transform.localScale = new Vector3(1, 1, 1);
+            draggedObject.transform.localScale = new Vector3(boardFactory.scale, boardFactory.scale, boardFactory.scale);
             draggedObject.GetComponent<Collider>().enabled = true;
             draggedObject = null;
         }
@@ -146,7 +150,7 @@ public class MouseInput: MonoBehaviour {
             if (to != null)
             {
                 Hexagon draggingHexagon = draggedObject.GetComponent<Hexagon>();
-            if (draggingHexagon != null && !boardFactory.placeHexagon(draggingHexagon, to.getTile()))
+            if (draggingHexagon != null && !boardFactory.placeHexagon(draggingHexagon, to.tile))
                 {
                     draggedObject.position = startPosition;
                 }

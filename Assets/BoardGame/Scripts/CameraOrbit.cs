@@ -24,6 +24,7 @@ public class CameraOrbit : MonoBehaviour
     public float zoomSpeed = .1f;
 
     public bool shouldOrbit = true;
+    public float orbitY = 40f;
 
     private new Camera camera;
 
@@ -164,7 +165,7 @@ public class CameraOrbit : MonoBehaviour
 
     private void OrbitCamera()
     {
-        _LocalRotation.y = 40f;
+        _LocalRotation.y = orbitY;
         _LocalRotation.x += Time.deltaTime * 3;
 
     }

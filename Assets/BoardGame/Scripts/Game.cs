@@ -6,6 +6,7 @@ using UnityEngine;
 public class Game : MonoBehaviour {
     
     public Board board { get; private set; }
+    public bool playAiInMainMenu = true;
     public Settings settings { get; private set; }
     private BoardFactory boardFactory;
 
@@ -28,7 +29,10 @@ public class Game : MonoBehaviour {
         cameraOrbit = FindObjectOfType<CameraOrbit>();
         menuController = FindObjectOfType<MenuController>();
         board = boardFactory.create(settings,this);
-        gameState = GameState.AI_PLAYING;
+        if (playAiInMainMenu)
+        {
+            gameState = GameState.AI_PLAYING;
+        }
     }
 
    
@@ -67,7 +71,10 @@ public class Game : MonoBehaviour {
     public void Restart()
     {
         board = boardFactory.Restart(settings);
-        gameState = GameState.AI_PLAYING;
+        if (playAiInMainMenu)
+        {
+            gameState = GameState.AI_PLAYING;
+        }
     }
 
 

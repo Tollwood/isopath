@@ -1636,6 +1636,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   camera: {fileID: 534669904}
+  dragScale: {x: 0, y: 0, z: 0}
 --- !u!114 &534669907
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1662,6 +1663,7 @@ MonoBehaviour:
   zoomOutMax: 90
   zoomSpeed: 0.1
   shouldOrbit: 1
+  orbitY: 40
 --- !u!1 &539253137
 GameObject:
   m_ObjectHideFlags: 0
@@ -1744,8 +1746,7 @@ MonoBehaviour:
   climber: {fileID: 2100000, guid: 7bd1acfb01df541d0b16e199c723cfb7, type: 2}
   digger: {fileID: 2100000, guid: 51258e7bacefb48ba9e0f3fa5fe401b4, type: 2}
   hoverMaterial: {fileID: 2100000, guid: cd130d25cbae24a46942e1a5fe8cfa0d, type: 2}
-  xqOffSet: 1.7320508
-  zrOffset: 1.5
+  scale: 0.5
 --- !u!114 &539253142
 MonoBehaviour:
   m_ObjectHideFlags: 0
